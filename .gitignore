@@ -3,6 +3,6 @@
 __pycache__
 migrations
 alembic.ini
-.env
+.env*
 .vscode
 requirements.txt
