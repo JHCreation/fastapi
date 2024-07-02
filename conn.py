@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 USERNAME= os.environ.get('DB_USERNAME')
-PASSWORD= quote_plus(os.environ.get('DB_PASSWORD'))
+PASSWORD= quote_plus(os.environ.get('DB_PASSWORD')).replace('%', '%%')
 # ENCORD_PW= quote_plus(PASSWORD)
 HOST= os.environ.get('DB_HOST')
 PORT= os.environ.get('DB_PORT')
