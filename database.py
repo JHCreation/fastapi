@@ -6,7 +6,7 @@ from sqlalchemy.ext.declarative import declarative_base
 
 from asyncio import current_task
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_scoped_session
-from conn import DATABASE_URL, DATABASE_URL_ASYNC
+from conn import DATABASE_URL_OR, DATABASE_URL, DATABASE_URL_ASYNC
 
 # engine = create_engine(DATABASE_URL)
 
@@ -20,7 +20,7 @@ from conn import DATABASE_URL, DATABASE_URL_ASYNC
 class engineconn:
 
     def __init__(self):
-        self.engine = create_engine(DATABASE_URL, pool_recycle = 500)
+        self.engine = create_engine(DATABASE_URL_OR, pool_recycle = 500)
 
     def sessionmaker(self):
         Session = sessionmaker(bind=self.engine)
