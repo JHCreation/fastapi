@@ -23,7 +23,7 @@ import meme.route
 # 얘네들이 실행되면서 load_dotenv(override)도 같이 덮어버리니 주의(순서)!
 
 load_dotenv(dotenv_path=f'{ROOT_DIR}/.env', override=True)
-# print('start!!!!', ROOT_DIR, os.environ.get('CORS_ORIGIN'))
+print('start!!!!', ROOT_DIR, os.environ.get('CORS_ORIGIN'))
 if __name__ == 'main':
     origins = json.loads(os.environ.get('CORS_ORIGIN'))
     app.add_middleware(
