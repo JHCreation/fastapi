@@ -2,8 +2,8 @@ name: Build and Deploy
 
 on:
   push:
-    branches:
-      - master
+    branches: 
+      [main]
 
 jobs:
   build:
@@ -12,10 +12,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
+      - name: test
+        run: 
+          echo 'test'
+      
 
       # - name: Copy file via scp
       #   uses: appleboy/scp-action@master
@@ -28,31 +28,31 @@ jobs:
       #     target: "~/projects/nestjs"
       #     rm: true
 
-      - name: Deploy with rsync
-        uses: burnett01/rsync-deployments@master
-        with:
-          switches: -avzr
-          path: ./
-          remote_path: ~/projects/fastapi
-          remote_host: ${{ secrets.REMOTE_IP }}
-          remote_user: ${{ secrets.REMOTE_USER }}
-          remote_key: ${{ secrets.SSH_PRIVATE_KEY }}
-          remote_port: ${{ secrets.REMOTE_SSH_PORT }}
+      # - name: Deploy with rsync
+      #   uses: burnett01/rsync-deployments@master
+      #   with:
+      #     switches: -avzr
+      #     path: ./
+      #     remote_path: ~/projects/fastapi
+      #     remote_host: ${{ secrets.REMOTE_IP }}
+      #     remote_user: ${{ secrets.REMOTE_USER }}
+      #     remote_key: ${{ secrets.SSH_PRIVATE_KEY }}
+      #     remote_port: ${{ secrets.REMOTE_SSH_PORT }}
 
-      - name: excuting remote ssh commands
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.REMOTE_IP }}
-          username: ${{ secrets.REMOTE_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.REMOTE_SSH_PORT }}
-          script: |
-            cd ~/projects/nestjs || exit 1
-            export NVM_DIR="$HOME/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-            export NODE_OPTIONS="--max_old_space_size=512"
-            rm -rf /tmp/* || true
-            rm -rf node_modules || exit 1
-            npm cache clean --force
-            npm i --omit=dev
-            pm2 reload nest-webpush || pm2 start dist/main.js --name nest-webpush
+      # - name: excuting remote ssh commands
+      #   uses: appleboy/ssh-action@master
+      #   with:
+      #     host: ${{ secrets.REMOTE_IP }}
+      #     username: ${{ secrets.REMOTE_USER }}
+      #     key: ${{ secrets.SSH_PRIVATE_KEY }}
+      #     port: ${{ secrets.REMOTE_SSH_PORT }}
+      #     script: |
+      #       cd ~/projects/nestjs || exit 1
+      #       export NVM_DIR="$HOME/.nvm"
+      #       [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+      #       export NODE_OPTIONS="--max_old_space_size=512"
+      #       rm -rf /tmp/* || true
+      #       rm -rf node_modules || exit 1
+      #       npm cache clean --force
+      #       npm i --omit=dev
+      #       pm2 reload nest-webpush || pm2 start dist/main.js --name nest-webpush
