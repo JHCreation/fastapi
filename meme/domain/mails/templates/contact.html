@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+</head>
+<body>
+  
+  <div id="email" style="
+    width:600px; margin: 50px auto;
+    border: 1px solid #ddd;
+    padding: 20px;
+  ">
+    <!-- Header --> 
+    <table role="presentation" cellspacing="0" width="100%">
+      <tr>
+        <!-- <td width="48" style="padding: 8px;">
+          <a href="https://www.corenzohouse.com" target="_blank" style="display:block; margin:0 auto; width: 64px;" >
+
+          {% include 'logo.html' %}
+          </a>
+        </td> -->
+        <td  style="padding: 8px; text-align: center;">
+          <div>
+            <!-- <a href="https://www.corenzohouse.com" target="_blank" style="vertical-align:middle; display:inline-block; margin:0 auto; width: 64px;  height: auto;" >
+
+              {% include 'logo.html' %}
+            </a> -->
+            <p style="vertical-align:middle; display:inline-block; font-size: 1.6rem; font-weight: 700; margin: 0; ">
+              문의사항
+            </p>
+          </div>
+          
+          <!-- <p style="font-size: 0.7rem; margin-top: 8px;">  </p> -->
+        </td>
+      </tr>
+    </table>
+  
+    <!-- Body --> 
+    <table role="presentation" cellspacing="0" width="100%" style="text-align: center; padding-top: 60px; padding-bottom: 60px;" >
+      
+      <tr style="height: 2.4em;">
+        <td>
+          <span style="font-weight: 900;">{{ name }}</span> 님의 문의사항이 접수 되었습니다.
+        </td>
+      </tr>
+      <tr style="height: 2.4em;">
+        <td>
+          이메일: <span style="font-weight: 900;">{{ email }}</span>
+        </td>
+      </tr>
+      <tr style="height: 2.4em;">
+        <td>
+          연락처: <span style="font-weight: 900;">{{ phone }}</span>
+        </td>
+      </tr>
+      <tr style="height: 2.4em;">
+        <td>
+          문의내용: <span style="font-weight: 900;">{{ content }}</span>
+        </td>
+      </tr>
+      
+    </table>
+
+    <!-- Footer -->
+    <table role="presentation" width="100%" cellspacing="0" style="margin-top: 20px;">
+      <tr style="background-color: #eee;">
+        <td></td>
+        <td  style="padding: 10px 10px; width: 64px;">
+          
+          <a href="https://www.myz.com" target="_blank" style="display:block; margin:0 auto; width: 64px;" >
+            {% include 'logo-out.html' %}
+             <!-- <img src="{{ host }}/images/emblem.svg" alt=""> -->
+          </a>
+          
+          <!-- <p style="margin:0 0 12px 0; font-size:16px; line-height:24px; color: #fff; font-family:Avenir">Pulmuone</p> -->
+          <a href="https://www.myz.com" target="_blank" style="display: block; margin-top: 10px; text-align: center; font-size: 9px; letter-spacing: 1px; color: #99ACC2;  font-family:Avenir;">www.myz.com</a>      
+        </td>
+        <td></td>
+      </tr>
+    </table>  
+
+  </div>
+
+</body>
+</html>
