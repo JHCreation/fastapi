@@ -14,7 +14,7 @@ jobs:
 
       - name: test
         run: 
-          echo 'test main!!'
+          echo 'test main!!!'
       
 
       # - name: Copy file via scp
