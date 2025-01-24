@@ -48,6 +48,7 @@ async def generate_email_html(request: Request, template_name: str, context: dic
 
 def sendEmails(smtp, addr, account, to_mail, msg):
     reg = r"^[a-zA-Z0-9.+_-]+@[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$"  # 유효성 검사를 위한 정규표현식
+    
     if re.match(reg, addr):
         smtp.sendmail(account, to_mail, msg.as_string())
         print("정상적으로 메일이 발송되었습니다.")
