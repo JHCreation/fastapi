@@ -26,7 +26,7 @@ jobs:
       - name: Deploy with rsync
         uses: burnett01/rsync-deployments@master
         with:
-          switches: -avzr
+          switches: -avzr --exclude='.git' --exclude='.github' --exclude='.gitignore'
           path: ./
           remote_path: ~/projects/test
           remote_host: ${{ secrets.REMOTE_IP }}
