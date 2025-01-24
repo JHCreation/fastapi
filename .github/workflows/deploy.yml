@@ -28,26 +28,21 @@ jobs:
         with:
           switches: -avzr --exclude='.git' --exclude='.github' --exclude='.gitignore'
           path: ./
-          remote_path: ~/projects/test
+          remote_path: ~/projects/fastapi
           remote_host: ${{ secrets.REMOTE_IP }}
           remote_user: ${{ secrets.REMOTE_USER }}
           remote_key: ${{ secrets.SSH_PRIVATE_KEY }}
           remote_port: ${{ secrets.REMOTE_SSH_PORT }}
 
-      # - name: excuting remote ssh commands
-      #   uses: appleboy/ssh-action@master
-      #   with:
-      #     host: ${{ secrets.REMOTE_IP }}
-      #     username: ${{ secrets.REMOTE_USER }}
-      #     key: ${{ secrets.SSH_PRIVATE_KEY }}
-      #     port: ${{ secrets.REMOTE_SSH_PORT }}
-      #     script: |
-      #       cd ~/projects/nestjs || exit 1
-      #       export NVM_DIR="$HOME/.nvm"
-      #       [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-      #       export NODE_OPTIONS="--max_old_space_size=512"
-      #       rm -rf /tmp/* || true
-      #       rm -rf node_modules || exit 1
-      #       npm cache clean --force
-      #       npm i --omit=dev
-      #       pm2 reload nest-webpush || pm2 start dist/main.js --name nest-webpush
+      - name: excuting remote ssh commands
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.REMOTE_IP }}
+          username: ${{ secrets.REMOTE_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.REMOTE_SSH_PORT }}
+          script: |
+            cd ~/projects/fastapi
+            source ~/venvs/fastapi/bin/activate
+            pip install -r requirements.txt
+            sudo systemctl restart fastapi
