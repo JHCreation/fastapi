@@ -53,8 +53,10 @@ router2 = APIRouter(
     dependencies=[Depends(check_domain2_auth)],
 )
 
-from corenzohouse.domain.user import user_router
+from .domain.user import user_router
 
+from .domain.webpush import webpush_router
 
+app.include_router(router)
 app.include_router(user_router.router)
 app.include_router(user_router.router2)

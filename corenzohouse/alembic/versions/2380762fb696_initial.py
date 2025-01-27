@@ -1,8 +1,8 @@
-"""empty message
+"""initial
 
-Revision ID: bfab98d9db75
-Revises: 1c7c13d28df2
-Create Date: 2024-11-25 14:05:20.321028
+Revision ID: 2380762fb696
+Revises: 
+Create Date: 2025-01-26 13:20:17.691203
 
 """
 from typing import Sequence, Union
@@ -12,8 +12,8 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 # revision identifiers, used by Alembic.
-revision: str = 'bfab98d9db75'
-down_revision: Union[str, None] = '1c7c13d28df2'
+revision: str = '2380762fb696'
+down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -31,6 +31,7 @@ def downgrade() -> None:
     sa.Column('id', mysql.INTEGER(display_width=11), autoincrement=True, nullable=False),
     sa.Column('key', mysql.VARCHAR(length=50), nullable=False),
     sa.Column('name', mysql.VARCHAR(length=50), nullable=True),
+    sa.Column('type', mysql.VARCHAR(length=50), nullable=True),
     sa.Column('content', mysql.LONGTEXT(), nullable=True),
     sa.Column('create_date', mysql.DATETIME(), nullable=False),
     sa.PrimaryKeyConstraint('id'),

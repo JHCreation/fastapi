@@ -24,7 +24,7 @@ print('corenzo-user_router', os.environ.get('DB_NAME'))
 def user_test(request: Request):
     return {'user test': str(request.base_url)}
 
-@router2.post("/call",) 
+@router2.post("/call") 
 def user_call(request: Request, 
               id: user_schema.User,
               db: Session = Depends(get_db),
