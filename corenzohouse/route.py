@@ -37,7 +37,7 @@ router = APIRouter(
     # allow_origins=["*"],
     prefix="/corenzo",
     tags=["corenzohouse"],
-    dependencies=[Depends(check_domain1_auth)],
+    # dependencies=[Depends(check_domain1_auth)],
 )
 # router.add_middleware(
 #     CORSMiddleware,
