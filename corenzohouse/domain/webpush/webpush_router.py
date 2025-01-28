@@ -26,16 +26,16 @@ from ...domain._comm import comm_crud
 from ...config import ROOT_DIR
 from dotenv import load_dotenv
 from ...model.webpush import WebPush
-
+import re
 # load_dotenv()
 load_dotenv(dotenv_path=f'{ROOT_DIR}/.env', override=True)
 
 VAPID_PRIVATE_KEY = os.environ.get('VAPID_PRIVATE_KEY')
 VAPID_PUBLIC_KEY = os.environ.get('VAPID_PUBLIC_KEY')
-VAPID_CLAIMS = {
-    "sub": f"mailto:{os.environ.get('VAPID_CLAIMS')}"
-}
-
+# VAPID_CLAIMS = {
+#     "sub": f"mailto:{os.environ.get('VAPID_CLAIMS')}"
+# }
+VAPID_CLAIMS_EMAIL = os.environ.get('VAPID_CLAIMS')
 
 @router.get("/subscribe", 
             #  status_code=status.HTTP_204_NO_CONTENT
@@ -63,13 +63,35 @@ async def subscribe(
     # return
     return await comm_crud.asyncCreate(WebPush, db, item, res_id='id', update=update)
     # return {"message": "Subscription successful"}
+def get_push_service(endpoint):
+    """
+    푸시 서비스 유형(Firebase 또는 APNs)을 반환합니다.
 
+    Args:
+        endpoint (str): 구독 정보의 endpoint URL
+
+    Returns:
+        str: 'FCM' 또는 'APNs' 또는 'Unknown'
+    """
+    if re.match(r"^https:\/\/fcm\.googleapis\.com\/fcm\/send\/.*", endpoint):
+        return "https://fcm.googleapis.com"
+    elif re.match(r"^https:\/\/web\.push\.apple\.com\/.*", endpoint):
+        return "https://web.push.apple.com"
+    else:
+        return ""
 async def send_webpush(subscription: webpush_schema.Subscription, message: str):
     print(({
                 "endpoint": subscription['endpoint'],
                 "keys": subscription['keys'],
             }))
     try:
+        push_service= get_push_service(subscription['endpoint'])
+        # print(push_service)
+        # return
+        vapid_claims= { 
+            "sub": f"mailto:{VAPID_CLAIMS_EMAIL}",
+            "aud": push_service
+        }
         webpush(
             subscription_info={
                 "endpoint": subscription['endpoint'],
@@ -77,7 +99,8 @@ async def send_webpush(subscription: webpush_schema.Subscription, message: str):
             },
             data=message,
             vapid_private_key=VAPID_PRIVATE_KEY,
-            vapid_claims=VAPID_CLAIMS,
+            vapid_claims=vapid_claims,
+            
         )
     except WebPushException as ex:
         # 실패한 경우 로그를 남기거나 에러 처리
