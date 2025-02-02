@@ -25,8 +25,9 @@ import meme.route
 # logging.debug("디버그 정보")
 # logging.error(os.environ.get('ENV'))
 load_dotenv(dotenv_path=f'{ROOT_DIR}/.env', override=True)
-logging.info(ROOT_DIR, 'start!!!',' 2start')
-logging.error(os.environ.get('CORS_ORIGIN'))
+# logging.info(ROOT_DIR, 'start!!!',' 2start')
+# print(ROOT_DIR)
+# logging.error(os.environ.get('CORS_ORIGIN'))
 if __name__ == 'main':
     origins = json.loads(os.environ.get('CORS_ORIGIN'))
     app.add_middleware(
