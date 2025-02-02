@@ -4,12 +4,11 @@ from ..database import Base
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from typing import List
 
-class WebPush(Base):
-    __tablename__ = "webpush"
+class Orders(Base):
+    __tablename__ = "orders"
 
     id = Column(Integer, primary_key=True)
     key = Column(VARCHAR(50), unique=True, nullable=False)
-    subscription = Column(MEDIUMTEXT, nullable=True)
-    endpoint = Column(VARCHAR(300), index=True, nullable=True)
+    content = Column(LONGTEXT, nullable=True)
     modify_date = Column(DateTime, nullable=False)
     create_date = Column(DateTime, nullable=False)

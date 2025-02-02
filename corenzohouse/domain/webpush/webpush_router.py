@@ -26,7 +26,6 @@ from ...domain._comm import comm_crud
 from ...config import ROOT_DIR
 from dotenv import load_dotenv
 from ...model.webpush import WebPush
-import re
 # load_dotenv()
 load_dotenv(dotenv_path=f'{ROOT_DIR}/.env', override=True)
 
@@ -48,7 +47,7 @@ async def webpush_get_subscribe(request: Request, db: Session = Depends(get_asyn
     }
     return {'webpush test': str(request.base_url)}
 
-
+# Create
 @router.post("/subscribe")
 async def subscribe(
     item: webpush_schema.WebPushCreate,
@@ -61,51 +60,18 @@ async def subscribe(
     }
     
     # return
-    return await comm_crud.asyncCreate(WebPush, db, item, res_id='id', update=update)
+    return await comm_crud.asyncCreate(WebPush, db, item, res_id='endpoint', update=update)
     # return {"message": "Subscription successful"}
-def get_push_service(endpoint):
-    """
-    푸시 서비스 유형(Firebase 또는 APNs)을 반환합니다.
 
-    Args:
-        endpoint (str): 구독 정보의 endpoint URL
-
-    Returns:
-        str: 'FCM' 또는 'APNs' 또는 'Unknown'
-    """
-    if re.match(r"^https:\/\/fcm\.googleapis\.com\/fcm\/send\/.*", endpoint):
-        return "https://fcm.googleapis.com"
-    elif re.match(r"^https:\/\/web\.push\.apple\.com\/.*", endpoint):
-        return "https://web.push.apple.com"
-    else:
-        return ""
-async def send_webpush(subscription: webpush_schema.Subscription, message: str):
-    print(({
-                "endpoint": subscription['endpoint'],
-                "keys": subscription['keys'],
-            }))
-    try:
-        push_service= get_push_service(subscription['endpoint'])
-        # print(push_service)
-        # return
-        vapid_claims= { 
-            "sub": f"mailto:{VAPID_CLAIMS_EMAIL}",
-            "aud": push_service
-        }
-        webpush(
-            subscription_info={
-                "endpoint": subscription['endpoint'],
-                "keys": subscription['keys'],
-            },
-            data=message,
-            vapid_private_key=VAPID_PRIVATE_KEY,
-            vapid_claims=vapid_claims,
-            
-        )
-    except WebPushException as ex:
-        # 실패한 경우 로그를 남기거나 에러 처리
-        return {"endpoint": subscription['endpoint'], "status": "failed", "error": str(ex)}
-    return {"endpoint": subscription['endpoint'], "status": "success"}
+@router.delete("/subscribe")
+async def subscribe(
+    item: webpush_schema.WebPushDelete,
+    db: Session = Depends(get_async_db),
+):
+    print(item)
+    # return 'delete test'
+    return await comm_crud.asyncDelete(WebPush, db, filter_key='endpoint', filter_value=item.endpoint, res_id='id')
+    
 
 @router.post("/push-bulk")
 # async def send_push_bulk(request: webpush_schema.PushNotificationRequest, db: Session = Depends(get_async_db)):
@@ -128,9 +94,15 @@ async def push_notification(
     #     'total': total,
     #     'list': list
     # }
-    
+    payload={
+        "notification": data,
+        "data": {
+            "sender": "홍길동"  # 발신자 이름을 custom_data로 포함
+        }
+    }
+
     tasks = [
-        send_webpush(subscription, json.dumps(data))
+        webpush_crud.send_webpush(subscription, json.dumps(data))
         # for subscription in request.subscriptions
         for subscription in subscriptions
     ]

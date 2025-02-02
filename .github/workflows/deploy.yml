@@ -45,4 +45,5 @@ jobs:
             cd ~/projects/fastapi
             source ~/venvs/fastapi/bin/activate
             pip install -r requirements.txt
+            alembic upgrade head
             sudo systemctl restart fastapi

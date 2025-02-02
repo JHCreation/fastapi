@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from datetime import datetime
-from sqlalchemy import select, or_, and_, not_, func
+from sqlalchemy import select, or_, and_, not_, func, delete
+from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from fastapi import APIRouter, HTTPException, Response, Request
 from starlette import status
 
@@ -115,8 +116,24 @@ async def asyncCreate(model, db: Session, param, res_id="id", update=None):
     data = model(**param)
    
     db.add(data)
-    await db.commit()
-    await db.refresh(data)
+
+    try:
+        await db.commit()
+        await db.refresh(data)
+    except IntegrityError as e:
+        await db.rollback()
+        raise HTTPException(
+            status_code=400,
+            detail="데이터 무결성 오류가 발생했습니다. (중복된 키 또는 필수 필드 누락)"
+        ) from e
+    except SQLAlchemyError as e:
+        await db.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail="데이터베이스 저장 중 오류가 발생했습니다."
+        ) from e
+    # await db.commit()
+    # await db.refresh(data)
     print('db저장 완료!')
     return { 
         res_id: getattr(data, res_id),
@@ -154,3 +171,17 @@ def update(model, db: Session, param, filter_key='id', filter_value='', res_id="
         res_id: getattr(data, res_id),
         'status': 'success'
     }
+
+
+
+async def asyncDelete(model, db: Session, filter_key='id', filter_value='', res_id="id", update=None):
+    stmt = delete(model).where(getattr(model, filter_key) == filter_value)
+    # 쿼리 출력
+    compiled_query = stmt.compile(compile_kwargs={"literal_binds": True})
+    print("Executing query:", str(compiled_query))
+    result = await db.execute(stmt)
+    await db.commit()
+    # await db.refresh()
+    # print('stmt', stmt)
+    # print('result', result)
+    return result.rowcount
