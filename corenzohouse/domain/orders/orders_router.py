@@ -27,11 +27,12 @@ from dotenv import load_dotenv
 from ...model.orders import Orders
 load_dotenv(dotenv_path=f'{ROOT_DIR}/.env', override=True)
 
+# from orders_crud import order_get_list
 
-@router.get("/orders", 
-            #  status_code=status.HTTP_204_NO_CONTENT
-             )
-async def orders_get_list(request: Request, db: Session = Depends(get_async_db)):
+@router.get("/orders")
+async def orders_get_list(request: Request, db: Session = Depends(get_async_db), min_date=None, max_date=None):
+    list= await orders_crud.order_get_list(db, min_date=min_date, max_date=max_date)
+    return{ 'list' : list }
     total, list = await comm_crud.aync_get_list_all(Orders, db)
     return {
         'total': total,
