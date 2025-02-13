@@ -25,7 +25,7 @@ from ...domain._comm import comm_crud
 
 from ...config import ROOT_DIR
 from dotenv import load_dotenv
-from ...model.webpush import WebPush
+from ...model.webpush import WebPush, WebPushLog
 # load_dotenv()
 load_dotenv(dotenv_path=f'{ROOT_DIR}/.env', override=True)
 
@@ -120,6 +120,11 @@ async def push_notification(
             })
         else:
             response.append(result)
+
+    update= {
+        'create_date' : datetime.now(),
+    }
+    log_res= await comm_crud.asyncCreate(WebPushLog, db, { 'log': str(response) }, res_id="id", update=update)
     return {"results": response}
 
 @router.post("/push")

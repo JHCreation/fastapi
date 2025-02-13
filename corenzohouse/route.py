@@ -56,6 +56,7 @@ router2 = APIRouter(
 from .domain.user import user_router
 from .domain.webpush import webpush_router
 from .domain.orders import orders_router
+from .domain.order_group import order_group_router
 
 app.include_router(router)
 app.include_router(user_router.router)

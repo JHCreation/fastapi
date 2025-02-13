@@ -30,14 +30,25 @@ load_dotenv(dotenv_path=f'{ROOT_DIR}/.env', override=True)
 # from orders_crud import order_get_list
 
 @router.get("/orders")
-async def orders_get_list(request: Request, db: Session = Depends(get_async_db), min_date=None, max_date=None):
-    list= await orders_crud.order_get_list(db, min_date=min_date, max_date=max_date)
+async def orders_get_list(
+    request: Request, 
+    db: Annotated[Session, Depends(get_async_db)], 
+    params: orders_schema.OrdersParams = Depends(),
+):
+    list= await orders_crud.order_get_list(db, params.model_dump(exclude_unset=True, exclude_none=True))
     return{ 'list' : list }
-    total, list = await comm_crud.aync_get_list_all(Orders, db)
-    return {
-        'total': total,
-        'list': list
-    }
+
+
+# @router.get("/orders")
+# async def orders_get_list(request: Request, db: Session = Depends(get_async_db), min_date=None, max_date=None, tid=None, oid=None, sid=None, status=None):
+#     list= await orders_crud.order_get_list(db, min_date=min_date, max_date=max_date, tid=tid, oid=oid, sid=sid, status=status)
+#     return{ 'list' : list }
+
+    # total, list = await comm_crud.aync_get_list_all(Orders, db)
+    # return {
+    #     'total': total,
+    #     'list': list
+    # }
 
 # Create
 @router.post("/orders")
@@ -45,7 +56,6 @@ async def subscribe(
     item: orders_schema.OrdersCreate,
     db: Session = Depends(get_async_db),
 ):
-    # 구독 정보를 데이터베이스에 저장하는 로직을 여기에 구현
     update= {
         'modify_date' : datetime.now(),
         'create_date' : datetime.now(),

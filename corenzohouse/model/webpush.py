@@ -13,3 +13,10 @@ class WebPush(Base):
     endpoint = Column(VARCHAR(300), index=True, nullable=True)
     modify_date = Column(DateTime, nullable=False)
     create_date = Column(DateTime, nullable=False)
+
+class WebPushLog(Base):
+    __tablename__ = "webpush_log"
+
+    id = Column(Integer, primary_key=True)
+    log = Column(MEDIUMTEXT, nullable=True)
+    create_date = Column(DateTime, nullable=False)

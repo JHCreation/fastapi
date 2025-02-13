@@ -107,10 +107,47 @@ def create(model, db: Session, param, res_id="id", update=None):
         'status': 'success'
     }
 
+async def aync_get_list_all(model, db: Session):
+    data = await db.scalars(select(model)
+                            .order_by(model.id.desc()))
+    total = await db.scalar(select(func.count()).select_from(model))
+    list = data.all()
+    return total, list
+    
+def get_item(model, db: Session, key: str, value: str):
+    print('get_item', key, value)
+    return db.query(model).filter(getattr(model, key) == value)
+
+def update(model, db: Session, param, filter_key='id', filter_value='', res_id="id", update=None):
+    param= param.model_dump(exclude_unset=True, exclude_none=True)
+    datas = get_item(model, db, key=filter_key, value=filter_value)
+    data= datas.first()
+    if not data:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="데이터를 찾을수 없습니다.")
+    if update != None:
+        param.update(update)
+
+    update_query = datas.update(
+        param,
+        synchronize_session="evaluate"
+    )
+    # print(update_query.statement.compile(compile_kwargs={"literal_binds": True}))
+    db.commit()
+    return { 
+        res_id: getattr(data, res_id),
+        'status': 'success'
+    }
+
+
+
+
 async def asyncCreate(model, db: Session, param, res_id="id", update=None):
     print('db 저장 시작')
     
-    param= param.model_dump()
+    if not isinstance(param, dict): 
+        param= param.model_dump(exclude_unset=True, exclude_none=True)
+    
     if update != None:
         param.update(update)
     data = model(**param)
@@ -140,38 +177,34 @@ async def asyncCreate(model, db: Session, param, res_id="id", update=None):
         'status': 'success'
     }
 
-async def aync_get_list_all(model, db: Session):
-    data = await db.scalars(select(model)
-                            .order_by(model.id.desc()))
-    total = await db.scalar(select(func.count()).select_from(model))
-    list = data.all()
-    return total, list
-    
-def get_item(model, db: Session, key: str, value: str):
-    print('get_item', key, value)
-    return db.query(model).filter(getattr(model, key) == value)
 
-def update(model, db: Session, param, filter_key='id', filter_value='', res_id="id", update=None):
-    param= param.model_dump(exclude_unset=True)
-    datas = get_item(model, db, key=filter_key, value=filter_value)
-    data= datas.first()
+def async_get_item(model, key: str, value: str):
+    # print('async_get_item', key, value)
+    return select(model).where(getattr(model, key) == value)
+
+async def asyncUpdate(model, db: Session, params, filter_key='id', filter_value='', res_id="id", update=None):
+    update_data = params.model_dump(exclude_unset=True, exclude_none=True)  # None이 아닌 값만 필터링'
+
+    query = async_get_item(model, key=filter_key, value=filter_value)
+    
+    result= await db.execute(query)
+    # data = result.scalars().first() 
+    data = result.scalar_one_or_none()
     if not data:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail="데이터를 찾을수 없습니다.")
     if update != None:
-        param.update(update)
+        update_data.update(update)
 
-    update_query = datas.update(
-        param,
-        synchronize_session="evaluate"
-    )
-    # print(update_query.statement.compile(compile_kwargs={"literal_binds": True}))
-    db.commit()
+    # ✅ 2. 전달된 데이터 순회하면서 None이 아닌 값만 업데이트
+    for key, value in update_data.items():
+        setattr(data, key, value)  # 동적으로 속성 업데이트
+    await db.commit()
+    await db.refresh(data)
     return { 
         res_id: getattr(data, res_id),
         'status': 'success'
     }
-
 
 
 async def asyncDelete(model, db: Session, filter_key='id', filter_value='', res_id="id", update=None):

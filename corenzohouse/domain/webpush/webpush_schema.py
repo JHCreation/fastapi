@@ -46,3 +46,7 @@ class WebPushList(BaseModel):
     total: int = 0
     list: List[WebPushRead] = []
 
+
+
+class WebPushLog(BaseModel):
+    log: str | None = None
