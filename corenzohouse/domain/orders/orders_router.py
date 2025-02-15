@@ -24,7 +24,10 @@ from ...domain._comm import comm_crud
 
 from ...config import ROOT_DIR
 from dotenv import load_dotenv
-from ...model.orders import Orders
+from ...model.orders import Orders, OrderGroup
+from ...domain.webpush import webpush_crud
+
+
 load_dotenv(dotenv_path=f'{ROOT_DIR}/.env', override=True)
 
 # from orders_crud import order_get_list
@@ -38,18 +41,6 @@ async def orders_get_list(
     list= await orders_crud.order_get_list(db, params.model_dump(exclude_unset=True, exclude_none=True))
     return{ 'list' : list }
 
-
-# @router.get("/orders")
-# async def orders_get_list(request: Request, db: Session = Depends(get_async_db), min_date=None, max_date=None, tid=None, oid=None, sid=None, status=None):
-#     list= await orders_crud.order_get_list(db, min_date=min_date, max_date=max_date, tid=tid, oid=oid, sid=sid, status=status)
-#     return{ 'list' : list }
-
-    # total, list = await comm_crud.aync_get_list_all(Orders, db)
-    # return {
-    #     'total': total,
-    #     'list': list
-    # }
-
 # Create
 @router.post("/orders")
 async def subscribe(
@@ -62,11 +53,35 @@ async def subscribe(
     }
     return await comm_crud.asyncCreate(Orders, db, item, res_id='id', update=update)
 
-# @router.delete("/orders")
-# async def subscribe(
-#     item: orders_schema.OrdersDelete,
-#     db: Session = Depends(get_async_db),
-# ):
-#     print(item)
-#     return await comm_crud.asyncDelete(Orders, db, filter_key='id', filter_value=item.endpoint, res_id='id')
+
+@router.post("/orders-group")
+async def subscribe(
+    item: orders_schema.Orders_Group= Body(...),
+    # item: orders_schema.Orders_Group,
+    # params: orders_schema.Orders_Group,
+    db: Session = Depends(get_async_db),
+):
+    params= item.model_dump(exclude_none=True)
+    
+    update= {
+        'modify_date' : datetime.now(),
+        'create_date' : datetime.now(),
+    }
+
+    group_result= 'pass'
+    if 'group' in params and params.get('group') is not None:
+        group_result= await comm_crud.asyncCreate(OrderGroup, db, params['group'], res_id='id', update=update)
+
+    if params['push'] == True:
+        pushData= json.loads(params['orders']['content'])
+        pushData['title']= params['title']
+        print(pushData)
+        push_result= await webpush_crud.push_notification_bulk(db, pushData)
+    
+    orders_result= await comm_crud.asyncCreate(Orders, db, params['orders'], res_id='id', update=update)
+        
+    return {
+        'group': group_result,
+        'orders': orders_result
+    }
     

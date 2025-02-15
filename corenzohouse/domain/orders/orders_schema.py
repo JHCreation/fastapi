@@ -2,10 +2,10 @@ import datetime
 from pydantic import BaseModel, field_validator, EmailStr
 from pydantic_core.core_schema import FieldValidationInfo
 # from pydantic.main import 
-from typing import Optional, Literal, List
-from typing import List
+from typing import Optional, Literal, List, Any
 
-from ..order_group.order_group_schema import OrderStatus
+from ..order_group.order_group_schema import OrderStatus, OrderGroup
+
 
 
 class Orders(BaseModel):
@@ -20,6 +20,12 @@ class OrdersParams(BaseModel):
     oid: str | None = None
     sid: str | None = None
     status: OrderStatus | None = None
+
+class Orders_Group(Orders):
+    push: bool
+    orders: Orders | None = None
+    group: OrderGroup | None = None
+    title: str
 
 class OrdersDelete(BaseModel):
     id: str

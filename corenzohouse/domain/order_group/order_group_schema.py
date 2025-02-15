@@ -26,6 +26,7 @@ class OrderGroup(BaseModel):
     order_id: str | None = None
     store_id: str | None = None
     table_id: str | None = None
+    sale_date: str | None = None
     status: OrderStatus = None
     # store_id: str | None = None
     # table_id: str | None = None

@@ -83,49 +83,7 @@ async def push_notification(
     # item: category_schema.CampaignCreate= Depends(),
     # db: Session = Depends(get_async_db),
 ):
-    # 모든 구독자에게 비동기로 푸시 알림 보내기
-    total, list = await comm_crud.aync_get_list_all(WebPush, db)
-    # print(total, list)
-    subscriptions = [json.loads(item.subscription) for item in list if item.subscription]
-    # print( subscriptions, type(subscriptions) )
-    # for item in list:
-    #     print(type(json.loads(item.subscription)))
-    # return {
-    #     'total': total,
-    #     'list': list
-    # }
-    payload={
-        "notification": data,
-        "data": {
-            "sender": "홍길동"  # 발신자 이름을 custom_data로 포함
-        }
-    }
-
-    tasks = [
-        webpush_crud.send_webpush(subscription, json.dumps(data))
-        # for subscription in request.subscriptions
-        for subscription in subscriptions
-    ]
-    results = await asyncio.gather(*tasks, return_exceptions=True)
-
-    # 결과 반환
-    response = []
-    for subscription, result in zip(subscriptions, results):
-        # print('subscription', subscription)
-        if isinstance(result, Exception):
-            response.append({
-                "endpoint": subscription['endpoint'],
-                "status": "failed",
-                "error": str(result)
-            })
-        else:
-            response.append(result)
-
-    update= {
-        'create_date' : datetime.now(),
-    }
-    log_res= await comm_crud.asyncCreate(WebPushLog, db, { 'log': str(response) }, res_id="id", update=update)
-    return {"results": response}
+    return await webpush_crud.push_notification_bulk(db, data)
 
 @router.post("/push")
 async def push_notification(

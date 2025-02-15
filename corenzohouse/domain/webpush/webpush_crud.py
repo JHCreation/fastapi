@@ -1,17 +1,17 @@
 import os
-from sqlalchemy.orm import Session
-from ...domain.webpush.webpush_schema import WebPushCreate, WebPushUpdate
-from ...model.webpush import WebPush
 from datetime import datetime
-from sqlalchemy import select, func, or_
-from starlette import status
-from fastapi import APIRouter, HTTPException, Response, Request
 import json
-from ...domain.webpush import webpush_schema
 from ...config import ROOT_DIR
 from dotenv import load_dotenv
 from pywebpush import webpush, WebPushException
 import re
+import asyncio
+from ...domain.webpush import webpush_crud, webpush_schema
+from ...domain._comm import comm_crud
+from ...model.webpush import WebPush, WebPushLog
+
+
+
 load_dotenv(dotenv_path=f'{ROOT_DIR}/.env', override=True)
 
 VAPID_PRIVATE_KEY = os.environ.get('VAPID_PRIVATE_KEY')
@@ -59,3 +59,50 @@ async def send_webpush(subscription: webpush_schema.Subscription, message: str):
         # 실패한 경우 로그를 남기거나 에러 처리
         return {"endpoint": subscription['endpoint'], "status": "failed", "error": str(ex)}
     return {"endpoint": subscription['endpoint'], "status": "success"}
+
+
+
+async def push_notification_bulk( db, data ):
+    # 모든 구독자에게 비동기로 푸시 알림 보내기
+    total, list = await comm_crud.aync_get_list_all(WebPush, db)
+    # print(total, list)
+    subscriptions = [json.loads(item.subscription) for item in list if item.subscription]
+    # print( subscriptions, type(subscriptions) )
+    # for item in list:
+    #     print(type(json.loads(item.subscription)))
+    # return {
+    #     'total': total,
+    #     'list': list
+    # }
+    payload={
+        "notification": data,
+        "data": {
+            "sender": "홍길동"  # 발신자 이름을 custom_data로 포함
+        }
+    }
+
+    tasks = [
+        send_webpush(subscription, json.dumps(data))
+        # for subscription in request.subscriptions
+        for subscription in subscriptions
+    ]
+    results = await asyncio.gather(*tasks, return_exceptions=True)
+
+    # 결과 반환
+    response = []
+    for subscription, result in zip(subscriptions, results):
+        # print('subscription', subscription)
+        if isinstance(result, Exception):
+            response.append({
+                "endpoint": subscription['endpoint'],
+                "status": "failed",
+                "error": str(result)
+            })
+        else:
+            response.append(result)
+
+    update= {
+        'create_date' : datetime.now(),
+    }
+    log_res= await comm_crud.asyncCreate(WebPushLog, db, { 'log': str(response) }, res_id="id", update=update)
+    return {"results": response}
