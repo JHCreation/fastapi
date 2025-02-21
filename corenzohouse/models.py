@@ -4,9 +4,8 @@ from .database import Base
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from typing import List
 
-from .model import webpush, orders
+from .model import webpush, orders, reviewers
 # from .model import wine
-print('model corenzo')
 # class User(Base):
 #     __tablename__ = "user"
 
