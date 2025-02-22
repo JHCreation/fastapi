@@ -53,12 +53,12 @@ router2 = APIRouter(
     dependencies=[Depends(check_domain2_auth)],
 )
 
-from .domain.user import user_router
+from .domain.users import users_router
 from .domain.webpush import webpush_router
 from .domain.orders import orders_router
 from .domain.order_group import order_group_router
 from .domain.reviewers import reviewers_router
 
 app.include_router(router)
-app.include_router(user_router.router)
-app.include_router(user_router.router2)
+# app.include_router(users_routers.router)
+# app.include_router(user_routers.router2)

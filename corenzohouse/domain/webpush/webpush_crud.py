@@ -10,6 +10,8 @@ from ...domain.webpush import webpush_crud, webpush_schema
 from ...domain._comm import comm_crud
 from ...model.webpush import WebPush, WebPushLog
 
+from sqlalchemy.orm import Session
+from sqlalchemy.future import select
 
 
 load_dotenv(dotenv_path=f'{ROOT_DIR}/.env', override=True)
@@ -53,7 +55,6 @@ async def send_webpush(subscription: webpush_schema.Subscription, message: str):
             data=message,
             vapid_private_key=VAPID_PRIVATE_KEY,
             vapid_claims=vapid_claims,
-            
         )
     except WebPushException as ex:
         # 실패한 경우 로그를 남기거나 에러 처리
@@ -61,10 +62,24 @@ async def send_webpush(subscription: webpush_schema.Subscription, message: str):
     return {"endpoint": subscription['endpoint'], "status": "success"}
 
 
+async def webpush_get_list( model, db: Session, params: dict ):
+    query = select(model)
+    print('params',params)
+
+    if params.get('status') is not None:
+        query = query.where(model.status == params['status'])
+    
+    print(f"Generated Webpush status Query: {str(query)}")
+    query= query.order_by(model.id.desc())
+    result= await db.execute(query)
+    data = result.scalars().all()
+    return data
 
 async def push_notification_bulk( db, data ):
     # 모든 구독자에게 비동기로 푸시 알림 보내기
-    total, list = await comm_crud.aync_get_list_all(WebPush, db)
+    list = await webpush_get_list(WebPush, db, {'status': 'use'})
+    # return
+    # total, list = await comm_crud.aync_get_list_all(WebPush, db)
     # print(total, list)
     subscriptions = [json.loads(item.subscription) for item in list if item.subscription]
     # print( subscriptions, type(subscriptions) )

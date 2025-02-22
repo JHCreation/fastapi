@@ -11,6 +11,7 @@ class WebPush(Base):
     key = Column(VARCHAR(50), unique=True, nullable=False)
     subscription = Column(MEDIUMTEXT, nullable=True)
     endpoint = Column(VARCHAR(300), index=True, nullable=True)
+    status = Column(VARCHAR(10), index=True, nullable=True)
     modify_date = Column(DateTime, nullable=False)
     create_date = Column(DateTime, nullable=False)
 

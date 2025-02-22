@@ -62,21 +62,25 @@ async def subscribe(
     db: Session = Depends(get_async_db),
 ):
     params= item.model_dump(exclude_none=True)
-    
     update= {
         'modify_date' : datetime.now(),
         'create_date' : datetime.now(),
     }
+    
+    if params['push'] == True:
+        pushData= json.loads(params['orders']['content'])
+        pushData['id']= params['orders']['key']
+        pushData['title']= params['title']
+        # print(pushData)
+        # push_result= await webpush_crud.push_notification_bulk(db, pushData)
+        asyncio.create_task(webpush_crud.push_notification_bulk(db, pushData))
+
 
     group_result= 'pass'
     if 'group' in params and params.get('group') is not None:
         group_result= await comm_crud.asyncCreate(OrderGroup, db, params['group'], res_id='id', update=update)
 
-    if params['push'] == True:
-        pushData= json.loads(params['orders']['content'])
-        pushData['title']= params['title']
-        print(pushData)
-        push_result= await webpush_crud.push_notification_bulk(db, pushData)
+    
     
     orders_result= await comm_crud.asyncCreate(Orders, db, params['orders'], res_id='id', update=update)
         
