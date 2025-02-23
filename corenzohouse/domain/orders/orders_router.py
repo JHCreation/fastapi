@@ -54,6 +54,24 @@ async def subscribe(
     }
     return await comm_crud.asyncCreate(Orders, db, item, res_id='id', update=update)
 
+@router.delete("/orders-item")
+async def subscribe(
+    item: orders_schema.OrdersItemDelete,
+    db: Session = Depends(get_async_db),
+):
+    print(item)
+    # return
+    return await comm_crud.asyncDelete(Orders, db, filter_key='key', filter_value=item.key, res_id='key')
+
+@router.delete("/orders")
+async def subscribe(
+    item: orders_schema.OrdersDelete,
+    db: Session = Depends(get_async_db),
+):
+    print(item)
+    # return
+    return await comm_crud.asyncDelete(Orders, db, filter_key='order_id', filter_value=item.order_id, res_id='order_id')
+  
 
 @router.post("/orders-group")
 async def subscribe(
@@ -76,7 +94,7 @@ async def subscribe(
         # print(pushData)
         # push_result= await webpush_crud.push_notification_bulk(db, pushData)
         # asyncio.create_task(webpush_crud.push_notification_bulk(db, pushData))
-        background_tasks.add_task(webpush_crud.push_notification_bulk, pushData)
+        background_tasks.add_task(webpush_crud.push_notification_bulk, db, pushData)
 
 
     # return {}s
