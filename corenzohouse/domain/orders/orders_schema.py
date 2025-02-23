@@ -32,6 +32,23 @@ class OrdersItemDelete(BaseModel):
 
 class OrdersDelete(BaseModel):
     order_id: str
+    
+class OrdersUpdate(Orders):
+    id: int
+
+
+
+class OrdersRead(OrdersUpdate):
+    modify_date: datetime.datetime
+    create_date: datetime.datetime
+    
 
 class OrdersCreate(Orders):
     pass
+
+
+
+class OrdersList(BaseModel):
+    total: int = 0
+    list: List[OrdersRead] = []
+

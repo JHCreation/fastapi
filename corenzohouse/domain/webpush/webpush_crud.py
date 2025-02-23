@@ -77,8 +77,8 @@ async def webpush_get_list( model, db:AsyncSession, params: dict ):
         data = result.scalars().all()
         return data
 
-async def push_notification_bulk( data ):
-    print('푸시진입!!!!!!!!!!')
+async def push_notification_bulk( db, data ):
+    # print('푸시진입!!!!!!!!!!')
     async with async_session_factory() as db:
         # 모든 구독자에게 비동기로 푸시 알림 보내기
         list = await webpush_get_list(WebPush, db, {'status': 'use'})

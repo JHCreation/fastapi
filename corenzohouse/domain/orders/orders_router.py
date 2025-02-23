@@ -91,13 +91,11 @@ async def subscribe(
         pushData= json.loads(params['orders']['content'])
         pushData['id']= params['orders']['key']
         pushData['title']= params['title']
-        # print(pushData)
+        print(pushData)
         # push_result= await webpush_crud.push_notification_bulk(db, pushData)
         # asyncio.create_task(webpush_crud.push_notification_bulk(db, pushData))
         background_tasks.add_task(webpush_crud.push_notification_bulk, db, pushData)
 
-
-    # return {}s
 
     group_result= 'pass'
     if 'group' in params and params.get('group') is not None:
