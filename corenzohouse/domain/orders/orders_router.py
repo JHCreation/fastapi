@@ -2,10 +2,11 @@ import os
 from datetime import timedelta, datetime
 from typing import Annotated, Union
 from fastapi import APIRouter, HTTPException, Response, Request
-from fastapi import Depends, Security
+from fastapi import Depends, Security, BackgroundTasks
 from fastapi.security import OAuth2PasswordRequestForm
 from jose import jwt, JWTError
 from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 from fastapi import FastAPI, Body
 import asyncio
@@ -56,10 +57,11 @@ async def subscribe(
 
 @router.post("/orders-group")
 async def subscribe(
+    background_tasks: BackgroundTasks,
     item: orders_schema.Orders_Group= Body(...),
     # item: orders_schema.Orders_Group,
     # params: orders_schema.Orders_Group,
-    db: Session = Depends(get_async_db),
+    db: AsyncSession = Depends(get_async_db),
 ):
     params= item.model_dump(exclude_none=True)
     update= {
@@ -73,8 +75,11 @@ async def subscribe(
         pushData['title']= params['title']
         # print(pushData)
         # push_result= await webpush_crud.push_notification_bulk(db, pushData)
-        asyncio.create_task(webpush_crud.push_notification_bulk(db, pushData))
+        # asyncio.create_task(webpush_crud.push_notification_bulk(db, pushData))
+        background_tasks.add_task(webpush_crud.push_notification_bulk, pushData)
 
+
+    # return {}s
 
     group_result= 'pass'
     if 'group' in params and params.get('group') is not None:

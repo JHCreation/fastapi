@@ -11,8 +11,9 @@ from ...domain._comm import comm_crud
 from ...model.webpush import WebPush, WebPushLog
 
 from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-
+from ...database import async_session_factory
 
 load_dotenv(dotenv_path=f'{ROOT_DIR}/.env', override=True)
 
@@ -62,62 +63,66 @@ async def send_webpush(subscription: webpush_schema.Subscription, message: str):
     return {"endpoint": subscription['endpoint'], "status": "success"}
 
 
-async def webpush_get_list( model, db: Session, params: dict ):
-    query = select(model)
-    print('params',params)
+async def webpush_get_list( model, db:AsyncSession, params: dict ):
+    # async with async_session_factory() as db:
+        query = select(model)
+        print('params',params)
 
-    if params.get('status') is not None:
-        query = query.where(model.status == params['status'])
-    
-    print(f"Generated Webpush status Query: {str(query)}")
-    query= query.order_by(model.id.desc())
-    result= await db.execute(query)
-    data = result.scalars().all()
-    return data
+        if params.get('status') is not None:
+            query = query.where(model.status == params['status'])
+        
+        print(f"Generated Webpush status Query: {str(query)}")
+        query= query.order_by(model.id.desc())
+        result= await db.execute(query)
+        data = result.scalars().all()
+        return data
 
-async def push_notification_bulk( db, data ):
-    # 모든 구독자에게 비동기로 푸시 알림 보내기
-    list = await webpush_get_list(WebPush, db, {'status': 'use'})
-    # return
-    # total, list = await comm_crud.aync_get_list_all(WebPush, db)
-    # print(total, list)
-    subscriptions = [json.loads(item.subscription) for item in list if item.subscription]
-    # print( subscriptions, type(subscriptions) )
-    # for item in list:
-    #     print(type(json.loads(item.subscription)))
-    # return {
-    #     'total': total,
-    #     'list': list
-    # }
-    payload={
-        "notification": data,
-        "data": {
-            "sender": "홍길동"  # 발신자 이름을 custom_data로 포함
+async def push_notification_bulk( data ):
+    print('푸시진입!!!!!!!!!!')
+    async with async_session_factory() as db:
+        # 모든 구독자에게 비동기로 푸시 알림 보내기
+        list = await webpush_get_list(WebPush, db, {'status': 'use'})
+        # return
+        # total, list = await comm_crud.aync_get_list_all(WebPush, db)
+        # print(total, list)
+        subscriptions = [json.loads(item.subscription) for item in list if item.subscription]
+        # print( subscriptions, type(subscriptions) )
+        # for item in list:
+        #     print(type(json.loads(item.subscription)))
+        # return {
+        #     'total': total,
+        #     'list': list
+        # }
+        payload={
+            "notification": data,
+            "data": {
+                "sender": "홍길동"  # 발신자 이름을 custom_data로 포함
+            }
         }
-    }
 
-    tasks = [
-        send_webpush(subscription, json.dumps(data))
-        # for subscription in request.subscriptions
-        for subscription in subscriptions
-    ]
-    results = await asyncio.gather(*tasks, return_exceptions=True)
+        tasks = [
+            send_webpush(subscription, json.dumps(data))
+            # for subscription in request.subscriptions
+            for subscription in subscriptions
+        ]
+        results = await asyncio.gather(*tasks, return_exceptions=True)
 
-    # 결과 반환
-    response = []
-    for subscription, result in zip(subscriptions, results):
-        # print('subscription', subscription)
-        if isinstance(result, Exception):
-            response.append({
-                "endpoint": subscription['endpoint'],
-                "status": "failed",
-                "error": str(result)
-            })
-        else:
-            response.append(result)
+        # 결과 반환
+        response = []
+        for subscription, result in zip(subscriptions, results):
+            # print('subscription', subscription)
+            if isinstance(result, Exception):
+                response.append({
+                    "endpoint": subscription['endpoint'],
+                    "status": "failed",
+                    "error": str(result)
+                })
+            else:
+                response.append(result)
 
-    update= {
-        'create_date' : datetime.now(),
-    }
-    log_res= await comm_crud.asyncCreate(WebPushLog, db, { 'log': str(response) }, res_id="id", update=update)
+        update= {
+            'create_date' : datetime.now(),
+        }
+        log_res= await comm_crud.asyncCreate(WebPushLog, db, { 'log': str(response) }, res_id="id", update=update)
+        
     return {"results": response}
