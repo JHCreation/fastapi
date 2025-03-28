@@ -17,6 +17,7 @@ class WebPush(BaseModel):
     key: str | None = None
     subscription: str | None = None
     endpoint: str | None = None
+    status: str | None = 'use'
     # msg: str | None = None
 
 

@@ -66,12 +66,9 @@ async def send_webpush(subscription: webpush_schema.Subscription, message: str):
 async def webpush_get_list( model, db:AsyncSession, params: dict ):
     # async with async_session_factory() as db:
         query = select(model)
-        print('params',params)
-
         if params.get('status') is not None:
             query = query.where(model.status == params['status'])
         
-        print(f"Generated Webpush status Query: {str(query)}")
         query= query.order_by(model.id.desc())
         result= await db.execute(query)
         data = result.scalars().all()

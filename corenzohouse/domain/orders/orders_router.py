@@ -87,14 +87,15 @@ async def subscribe(
         'create_date' : datetime.now(),
     }
     
-    if params['push'] == True:
-        pushData= json.loads(params['orders']['content'])
-        pushData['id']= params['orders']['key']
-        pushData['title']= params['title']
-        print(pushData)
-        # push_result= await webpush_crud.push_notification_bulk(db, pushData)
-        # asyncio.create_task(webpush_crud.push_notification_bulk(db, pushData))
-        background_tasks.add_task(webpush_crud.push_notification_bulk, db, pushData)
+    # if params['push'] == True:
+    pushData= json.loads(params['orders']['content'])
+    pushData['id']= params['orders']['key']
+    pushData['title']= params['title']
+    pushData['push']= params['push']
+    # print(pushData)
+    # push_result= await webpush_crud.push_notification_bulk(db, pushData)
+    # asyncio.create_task(webpush_crud.push_notification_bulk(db, pushData))
+    background_tasks.add_task(webpush_crud.push_notification_bulk, db, pushData)
 
 
     group_result= 'pass'

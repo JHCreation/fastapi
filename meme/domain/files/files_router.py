@@ -29,12 +29,13 @@ router = APIRouter(
 def makedirs(path):
     if not os.path.exists(path):
         os.makedirs(path, exist_ok=True, mode=0o777)
+
 from meme.domain.files import files_crud
 from meme.domain.files.files_schema import FilesUpload, FilesDelete, FilesDeletes
 
 ROOT_PATH= os.environ.get('ROOT_PATH')
 UPLOAD_PATH= os.environ.get('UPLOAD_PATH')
-UPLOADS_PATH= f"{ROOT_PATH}\\{UPLOAD_PATH}"
+UPLOADS_PATH= f"{UPLOAD_PATH}"
 
 @router.post("/uploads")
 async def upload_file( form_data: FilesUpload = Depends(FilesUpload.as_form),

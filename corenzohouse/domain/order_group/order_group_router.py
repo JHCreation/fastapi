@@ -28,6 +28,11 @@ from dotenv import load_dotenv
 from ...model.orders import OrderGroup
 load_dotenv(dotenv_path=f'{ROOT_DIR}/.env', override=True)
 
+import logging
+
+log_level = os.getenv("LOG_LEVEL", "INFO").upper()
+logging.basicConfig(level=log_level)
+logger = logging.getLogger(__name__)
 # from orders_crud import order_get_list
 # def common_parameters(q: str | None = None, skip: int = 0, limit: int = 10):
 #     return {"q": q, "skip": skip, "limit": limit}
@@ -61,6 +66,7 @@ async def order_group_get_list(
     # item: dict = Depends(common_parameters),
     params: order_group_schema.OrderGroupParams = Depends(),
 ):
+    logger.info('get order')
     # params = dict(request.query_params)
     order= await order_group_crud.order_group_get_item(db, params.model_dump(exclude_unset=True, exclude_none=True))
     if not order:

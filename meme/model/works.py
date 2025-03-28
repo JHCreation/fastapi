@@ -12,4 +12,5 @@ class Works(Base):
     title = Column(VARCHAR(50), nullable=True)
     subject = Column(VARCHAR(150), nullable=True)
     content = Column(LONGTEXT, nullable=True)
+    thumb = Column(MEDIUMTEXT, nullable=True)
     create_date = Column(DateTime, nullable=False)

@@ -9,7 +9,7 @@ class Works(BaseModel):
     key: str | None = None
     title: str | None = None
     content: str | None = None
-    # doc_01: str | None = None
+    thumb: str | None = None
     # doc_02: str | None = None
     # create_date: datetime.datetime
 

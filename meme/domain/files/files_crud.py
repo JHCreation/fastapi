@@ -6,6 +6,8 @@ from meme.domain.files.files_schema import FilesUpload, FilesDelete
 from fastapi import Depends, status
 from operator import itemgetter
 import shutil
+from pathlib import Path
+
 from dotenv import load_dotenv
 load_dotenv()
 ROOT_PATH= os.environ.get('ROOT_PATH')
@@ -29,8 +31,8 @@ async def file_chunk_upload (
     chunk_number= files_upload.chunk_number
     total_chunks= files_upload.total_chunks
     
-    makedirs(UPLOADS_FILE_PATH)
-    makedirs(CHUNK_PATH)
+    makedirs(Path(UPLOADS_FILE_PATH))
+    makedirs(Path(CHUNK_PATH))
 
     isLast = (int(chunk_number) + 1) == int(
         total_chunks

@@ -3,6 +3,31 @@ from ...model.reviewers import Reviewers
 from sqlalchemy.future import select
 
 
+import sys
+import os
+import hashlib
+import hmac
+import base64
+import requests
+import time
+
+def	make_signature(accessKey, secretKey, timestamp):
+    # timestamp = int(time.time() * 1000)
+    # timestamp = str(timestamp)
+
+    access_key = accessKey
+    secret_key = secretKey
+    secret_key = bytes(secret_key, 'UTF-8')
+
+    method = "POST"
+    uri = "/sms/v2/services/ncp:sms:kr:257063279563:jhc-message/messages"
+
+    message = method + " " + uri + "\n" + timestamp + "\n" + access_key
+    message = bytes(message, 'UTF-8')
+    signingKey = base64.b64encode(hmac.new(secret_key, message, digestmod=hashlib.sha256).digest())
+    return signingKey
+
+
 async def reviewers_get_list( db: Session, params: dict ):
     query = select(Reviewers)
 
