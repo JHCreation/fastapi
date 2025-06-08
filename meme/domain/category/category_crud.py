@@ -46,10 +46,20 @@ def update_category(db: Session, category_update, id):
 def create_category(db: Session, category_create: CategoryCreate):
     # print(category_create.model_dump())
     param= category_create.model_dump()
+    
+    logging.debug(type(param))
+    for key, value in param.items():
+        logging.debug(f'Key: {key}, Value: {value}, Type: {type(value)}')
+        if not isinstance(value, (str, type(None))):
+            param[key]= json.dumps(value)
+
+    logging.debug(param)
+    # return
     param.update({ 
         'create_date' : datetime.now(), 
         'modify_date' : datetime.now() 
     })
+    
     db_category = Category(**param)
    
     db.add(db_category)

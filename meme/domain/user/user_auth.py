@@ -1,5 +1,5 @@
 import os
-from datetime import timedelta, datetime, timezone
+from datetime import timedelta, datetime, timezone, UTC
 
 from fastapi import  HTTPException, Response, Request
 from fastapi import Depends
@@ -65,9 +65,9 @@ async def api_token(token: str = Depends(api_key_header) ):
 
 def create_access_token(subject: Union[str, Any], expires_delta: int = None) -> str:
     if expires_delta is not None:
-        expires_delta = datetime.now(timezone.utc) + expires_delta
+        expires_delta = datetime.now(UTC) + expires_delta
     else:
-        expires_delta = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        expires_delta = datetime.now(UTC) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     
     to_encode:user_schema.JWT = {"exp": expires_delta, "sub": str(subject)}
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, ALGORITHM)
@@ -79,21 +79,25 @@ def create_refresh_token(subject: Union[str, Any], expires_delta: int = None) ->
     else:
         expires_delta = datetime.now(timezone.utc) + timedelta(minutes=REFRESH_TOKEN_EXPIRE_MINUTES)
     
+    print(datetime.now(timezone.utc), timedelta(minutes=REFRESH_TOKEN_EXPIRE_MINUTES), expires_delta)
     to_encode:user_schema.JWT = {"exp": expires_delta, "sub": str(subject)}
     encoded_jwt = jwt.encode(to_encode, REFRESH_SECRET_KEY, ALGORITHM)
     return encoded_jwt
 
 def set_cookie(response: Response, key: str, value, exp_min):
-    expires= timedelta(minutes=exp_min)
+    expires= datetime.now(UTC) + timedelta(minutes=exp_min)
     response.set_cookie(key=key, 
                         value=value, 
+                        # path="/",
                         expires=expires, 
                         samesite="none",
                         secure=True,
                         httponly=True)
     
 def delete_cookie(response: Response, key: str):
+    print('delete', key)
     response.delete_cookie( key=key,
+                            # path="/",
                             samesite="none",
                             secure=True,
                             httponly=True)

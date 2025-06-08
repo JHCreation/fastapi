@@ -9,6 +9,9 @@ ROOT_DIR=os.path.dirname(current_file_path)
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 import logging
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
+from fastapi import APIRouter, HTTPException, Response, Request
 
 
 def get_allowed_origins(origin):
@@ -20,6 +23,7 @@ def get_allowed_origins(origin):
 app = FastAPI()
 import corenzohouse.route
 import meme.route
+import website.route
 # 얘네들이 실행되면서 load_dotenv(override)도 같이 덮어버리니 주의(순서)!
 
 # logging.debug("디버그 정보")
@@ -28,6 +32,19 @@ load_dotenv(dotenv_path=f'{ROOT_DIR}/.env', override=True)
 # logging.info(ROOT_DIR, 'start!!!',' 2start')
 # print(ROOT_DIR)
 # logging.error(os.environ.get('CORS_ORIGIN'))
+log_level = os.getenv("LOG_LEVEL", "INFO").upper()
+logging.basicConfig(level=log_level)
+logger = logging.getLogger(__name__)
+# print(log_level, '???')
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    logger.error(f"Validation error: {exc.errors()}")
+    logger.error(f"Request body: {await request.body()}")
+    return JSONResponse(
+        status_code=422,
+        content={"detail": exc.errors(), "body": (await request.body()).decode()},
+    )
+
 if __name__ == 'main':
     origins = json.loads(os.environ.get('CORS_ORIGIN'))
     app.add_middleware(

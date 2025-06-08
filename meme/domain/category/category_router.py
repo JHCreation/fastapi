@@ -5,7 +5,7 @@ from fastapi import APIRouter, HTTPException, Response, Request
 from fastapi import Depends, Security
 from fastapi.encoders import jsonable_encoder
 
-from meme.database import get_db
+from meme.database import get_db, get_async_db
 from meme.domain.category import category_crud, category_schema
 from meme.domain._comm import comm_crud, comm_schema
 from pydantic import ValidationError
@@ -13,6 +13,8 @@ from sqlalchemy.orm import Session
 from starlette import status
 from meme.domain.user.user_auth import api_bearer_token
 import time
+
+from ..logger import logging
 
 db= os.environ.get('DB_NAME')
 router = APIRouter(
@@ -22,22 +24,26 @@ router = APIRouter(
 from meme.models import Category
 
 
-@router.get("/test")
-def category_test():
-    print('tesssss')
-    return os.environ.get('MEME_DB_NAME')
 
 @router.put("/update/{id}")
-def category_update(
+async def category_update(
     # item,
-    id: int,
+    id: str,
     item: category_schema.CategoryCreate,
     # item: category_schema.CampaignCreate= Depends(),
-    db: Session = Depends(get_db),
+    # db: Session = Depends(get_db),
+    db: Session = Depends(get_async_db),
     api_key: str = Security(api_bearer_token)
 ):  
     update_data = item.model_dump(exclude_unset=True)
-    print(item, update_data)
+    print(item)
+    # return
+
+    update= {
+        'modify_date' : datetime.now(),
+    }
+    return await comm_crud.asyncUpdate(Category, db, params=item, filter_key='key', filter_value=id, res_id='key', update=update)
+
     return category_crud.update_category(db, update_data, id=id)
 
 @router.post("/create")
@@ -45,8 +51,9 @@ def category_create(
     item: category_schema.CategoryCreate,
     # item: category_schema.CampaignCreate= Depends(),
     db: Session = Depends(get_db),
-    api_key: str = Security(api_bearer_token)
+    api_key: str = Security(api_bearer_token),
 ):  
+    logging.debug(item)
     category = category_crud.get_existing_category(db, category_create=item)
     if category:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT,

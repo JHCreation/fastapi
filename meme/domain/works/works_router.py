@@ -15,7 +15,7 @@ from ...domain.user.user_auth import api_bearer_token
 import time
 import httpx
 
-db= os.environ.get('DB_NAME')
+# db= os.environ.get('DB_NAME')
 router = APIRouter(
     prefix="/api/works",
     tags=["meme works"]

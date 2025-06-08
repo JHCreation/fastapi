@@ -1,8 +1,11 @@
 from sqlalchemy.orm import Session
 from datetime import datetime
-from sqlalchemy import select, or_, and_, not_, func
+from sqlalchemy import select, or_, and_, not_, func, delete
+from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from fastapi import APIRouter, HTTPException, Response, Request
 from starlette import status
+import json
+import logging
 
 def qryTree(node, model):
     print(type(node),node['id'])
@@ -106,22 +109,29 @@ def create(model, db: Session, param, res_id="id", update=None):
         'status': 'success'
     }
 
-async def asyncCreate(model, db: Session, param, res_id="id", update=None):
-    print('db 저장 시작')
+# async def asyncCreate(model, db: Session, param, res_id="id", update=None):
+#     print('db 저장 시작')
     
-    param= param.model_dump()
-    if update != None:
-        param.update(update)
-    data = model(**param)
+#     param= param.model_dump()
+#     if update != None:
+#         param.update(update)
+    
+#     # logging.debug(type(param))
+#     # for key, value in param.items():
+#     #     logging.debug(f'Key: {key}, Value: {value}, Type: {type(value)}')
+#     #     if not isinstance(value, (str, type(None))):
+#     #         param[key]= json.dumps(value)
+    
+#     data = model(**param)
    
-    db.add(data)
-    await db.commit()
-    await db.refresh(data)
-    print('db저장 완료!')
-    return { 
-        res_id: getattr(data, res_id),
-        'status': 'success'
-    }
+#     db.add(data)
+#     await db.commit()
+#     await db.refresh(data)
+#     print('db저장 완료!')
+#     return { 
+#         res_id: getattr(data, res_id),
+#         'status': 'success'
+#     }
 
 def get_item(model, db: Session, key: str, value: str):
     print('get_item', key, value)
@@ -147,3 +157,89 @@ def update(model, db: Session, param, filter_key='id', filter_value='', res_id="
         res_id: getattr(data, res_id),
         'status': 'success'
     }
+
+
+
+
+
+async def asyncCreate(model, db: Session, param, res_id="id", update=None):
+    print('db 저장 시작')
+    
+    if not isinstance(param, dict): 
+        param= param.model_dump(exclude_unset=True, exclude_none=True)
+    
+    if update != None:
+        param.update(update)
+    data = model(**param)
+   
+    db.add(data)
+
+    try:
+        await db.commit()
+        await db.refresh(data)
+    except IntegrityError as e:
+        await db.rollback()
+        raise HTTPException(
+            status_code=400,
+            detail="데이터 무결성 오류가 발생했습니다. (중복된 키 또는 필수 필드 누락)"
+        ) from e
+    except SQLAlchemyError as e:
+        await db.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail="데이터베이스 저장 중 오류가 발생했습니다."
+        ) from e
+    # await db.commit()
+    # await db.refresh(data)
+    print('db저장 완료!')
+    return { 
+        res_id: getattr(data, res_id),
+        'status': 'success'
+    }
+
+
+def async_get_item(model, key: str, value: str):
+    # print('async_get_item', key, value)
+    return select(model).where(getattr(model, key) == value)
+
+async def asyncUpdate(model, db: Session, params, filter_key='id', filter_value='', res_id="id", update=None):
+    update_data = params.model_dump(exclude_unset=True, exclude_none=True)  # None이 아닌 값만 필터링'
+
+    for key, value in update_data.items():
+            logging.debug(f'Key: {key}, Value: {value}, Type: {type(value)}')
+            if not isinstance(value, (str, type(None))):
+                update_data[key]= json.dumps(value)
+
+    query = async_get_item(model, key=filter_key, value=filter_value)
+    
+    result= await db.execute(query)
+    # data = result.scalars().first() 
+    data = result.scalar_one_or_none()
+    if not data:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="데이터를 찾을수 없습니다.")
+    if update != None:
+        update_data.update(update)
+
+    
+    for key, value in update_data.items():
+        setattr(data, key, value)  # 동적으로 속성 업데이트
+    await db.commit()
+    await db.refresh(data)
+    return { 
+        res_id: getattr(data, res_id),
+        'status': 'success'
+    }
+
+
+async def asyncDelete(model, db: Session, filter_key='id', filter_value='', res_id="id", update=None):
+    stmt = delete(model).where(getattr(model, filter_key) == filter_value)
+    # 쿼리 출력
+    compiled_query = stmt.compile(compile_kwargs={"literal_binds": True})
+    print("Executing query:", str(compiled_query))
+    result = await db.execute(stmt)
+    await db.commit()
+    # await db.refresh()
+    # print('stmt', stmt)
+    # print('result', result)
+    return result.rowcount

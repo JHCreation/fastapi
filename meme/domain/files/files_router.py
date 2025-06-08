@@ -20,6 +20,8 @@ import json
 import os
 import uuid
 from dotenv import load_dotenv
+from ..logger import logging
+
 load_dotenv()
 
 router = APIRouter(
@@ -38,8 +40,10 @@ UPLOAD_PATH= os.environ.get('UPLOAD_PATH')
 UPLOADS_PATH= f"{UPLOAD_PATH}"
 
 @router.post("/uploads")
-async def upload_file( form_data: FilesUpload = Depends(FilesUpload.as_form),
-                      api_key: str = Security(api_bearer_token) ):
+async def upload_file( 
+    form_data: FilesUpload = Depends(FilesUpload.as_form),
+    api_key: str = Security(api_bearer_token)
+):
     """
     Handles file uploads with chunked transfer
     (if total_chunks > 1) or single-file upload.
@@ -48,7 +52,9 @@ async def upload_file( form_data: FilesUpload = Depends(FilesUpload.as_form),
         HTTPException: If a validation error occurs
         (e.g., missing data, invalid file size).
     """
-      # Generate a unique file name for the chunk
+    
+    # logging.debug(form_data)
+    # return
     FILE_PATH= form_data.path
     CHUNK_PATH= f"{UPLOADS_PATH}/temp"
     UPLOADS_FILE_PATH= f"{UPLOADS_PATH}/{FILE_PATH}"
@@ -59,40 +65,50 @@ async def upload_file( form_data: FilesUpload = Depends(FilesUpload.as_form),
     )
     
 @router.post("/update")
-async def upload_file( form_data: FilesUpload = Depends(FilesUpload.as_form), 
-                      api_key: str = Security(api_bearer_token) ):
-    print('update', form_data.path)
+async def upload_file( 
+        form_data: FilesUpload = Depends(FilesUpload.as_form), 
+        api_key: str = Security(api_bearer_token) 
+    ):
+    logging.debug(f'update, {form_data}')
+
+    FILE_PATH= form_data.path
     CHUNK_PATH= f"{UPLOADS_PATH}/temp"
-    UPLOADS_FILE_PATH= f"{UPLOADS_PATH}/{form_data.path}"
-    files_delete= { 'path': UPLOADS_FILE_PATH }
-    files_crud.delete_files(files_delete=files_delete)
+    UPLOADS_FILE_PATH= f"{UPLOADS_PATH}/{FILE_PATH}"
+
+    # files_delete= { 'path': UPLOADS_FILE_PATH }
+    # files_crud.delete_files(UPLOADS_FILE_PATH)
 
     return await files_crud.file_chunk_upload(
-        files_upload=form_data, CHUNK_PATH=CHUNK_PATH, UPLOADS_FILE_PATH=UPLOADS_FILE_PATH 
+        files_upload=form_data, CHUNK_PATH=CHUNK_PATH, UPLOADS_FILE_PATH=UPLOADS_FILE_PATH, FILE_PATH=FILE_PATH 
     )
 
 @router.delete("/delete")
-def delete_files(files_delete: FilesDelete, api_key: str = Security(api_bearer_token)):
-    delte_path=files_delete.model_dump(exclude_unset=True)
-    # print(delte_path['path'])
-    path= delte_path['path'].replace("/", "\\")
+def delete_files(
+    files_delete: FilesDelete, 
+    api_key: str = Security(api_bearer_token)
+):
+    del_path=files_delete.model_dump(exclude_unset=True)
+    # print(del_path['path'])
+    # path= del_path['path'].replace("/", "\\")
     # print(path)
-    delete_path= f"{UPLOADS_PATH}/{path}"
+    delete_path= f"{UPLOADS_PATH}/{del_path['path']}"
+    logging.debug(f'delete, {delete_path}')
+
     return files_crud.delete_files(delete_path)
 
 @router.delete("/deletes")
 def delete_files(files_delete: FilesDeletes, api_key: str = Security(api_bearer_token)):
     print(files_delete)
     # return
-    delte_path=files_delete.model_dump(exclude_unset=True)
-    paths= json.loads(delte_path['paths'])
+    del_path=files_delete.model_dump(exclude_unset=True)
+    paths= json.loads(del_path['paths'])
     # print(paths)
 
     res= []
     for p in paths:
         # print(path)
-        path= p.replace("/", "\\")
-        delete_path= f"{UPLOADS_PATH}/{path}"
+        # path= p.replace("/", "\\")
+        delete_path= f"{UPLOADS_PATH}/{p}"
         print(delete_path)
         res.append(files_crud.delete_files(delete_path))
     

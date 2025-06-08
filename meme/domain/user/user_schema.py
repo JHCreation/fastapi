@@ -1,6 +1,7 @@
 import datetime
 from pydantic import BaseModel, field_validator, EmailStr
 from pydantic_core.core_schema import FieldValidationInfo
+from typing import Optional
 
 class User(BaseModel):
     userid: str
@@ -64,11 +65,15 @@ class UserCreate(User):
     #         raise ValueError('비밀번호가 일치하지 않습니다')
     #     return v
 
+class RefreshToken(BaseModel):
+    refresh_token: str
+
 class Token(BaseModel):
     access_token: str
-    # refresh_token: str
     token_type: str
     userid: str
+    refresh_token: Optional[str] = None 
+
 
 class JWT(BaseModel):
     exp: int
