@@ -31,7 +31,7 @@ import website.route
 load_dotenv(dotenv_path=f'{ROOT_DIR}/.env', override=True)
 # logging.info(ROOT_DIR, 'start!!!',' 2start')
 # print(ROOT_DIR)
-# logging.error(os.environ.get('CORS_ORIGIN'))
+logging.error(os.environ.get('CORS_ORIGIN'))
 log_level = os.getenv("LOG_LEVEL", "INFO").upper()
 logging.basicConfig(level=log_level)
 logger = logging.getLogger(__name__)

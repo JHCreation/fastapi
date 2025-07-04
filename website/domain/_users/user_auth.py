@@ -31,7 +31,7 @@ REFRESH_KEY_NAME= os.environ.get('REFRESH_KEY_NAME')
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/user/login")
 api_key_header = APIKeyHeader(name="Authorization", auto_error=False)
 get_bearer_token = HTTPBearer(auto_error=False)
-# print('meme SECRET_KEY', SECRET_KEY, ROOT_DIR, ACCESS_TOKEN_EXPIRE_MINUTES, REFRESH_TOKEN_EXPIRE_MINUTES)
+print('meme SECRET_KEY', SECRET_KEY, ROOT_DIR, ACCESS_TOKEN_EXPIRE_MINUTES, REFRESH_TOKEN_EXPIRE_MINUTES)
 def auth_token(token: str, secret_key: str= SECRET_KEY):
     try:
         payload= jwt.decode(

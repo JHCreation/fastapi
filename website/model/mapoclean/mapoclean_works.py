@@ -4,7 +4,6 @@ from ...database import Base
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from typing import List
 
-print('마포크린 웍스 모델')
 class Works(Base):
     __tablename__ = "mapoclean_works"
 
@@ -14,5 +13,7 @@ class Works(Base):
     subject = Column(VARCHAR(150), nullable=True)
     contents = Column(LONGTEXT, nullable=True)
     # thumb = Column(MEDIUMTEXT, nullable=True)
+    public = Column(VARCHAR(10), nullable=True)
     images = Column(MEDIUMTEXT, nullable=True)
+    modify_date = Column(DateTime, nullable=True)
     create_date = Column(DateTime, nullable=False)

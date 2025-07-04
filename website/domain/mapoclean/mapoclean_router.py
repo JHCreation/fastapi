@@ -7,7 +7,8 @@ from starlette.middleware.cors import CORSMiddleware
 from fastapi import APIRouter, HTTPException, Response, Request
 from fastapi import Depends, Security
 
-ALLOWED_ORIGINS = ["http://localhost:5173", "example.com"]
+DOMAIN_NAME="mapoclean"
+ALLOWED_ORIGINS = ["http://localhost:5173", "https://mapoclean.com", "https://www.mapoclean.com"]
 async def check_domain_auth(request: Request):
     print('마포크린 요청 호스트 검사', request.headers.get("origin"))
     if request.headers.get("origin") not in ALLOWED_ORIGINS:

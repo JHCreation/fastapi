@@ -7,6 +7,7 @@ from fastapi import Depends, status
 from operator import itemgetter
 import shutil
 from pathlib import Path
+from typing import List
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -69,7 +70,7 @@ def delete_files(path: str):
     dir=Path(path)
     # dir= f"{UPLOADS_PATH}{path}"
     # dir= os.path.join(UPLOADS_PATH, item.path)
-    print(path, dir)
+    # print(path, dir)
     # return
     
     try:
@@ -81,3 +82,11 @@ def delete_files(path: str):
       print('에러발생')
       return JSONResponse(
         {"status": "fail"}, status_code=status.HTTP_200_OK)
+
+def delete_multiple_files(root_path:str, paths:List[str]):
+    res= []
+    for p in paths:
+        delete_path= f"{root_path}/{p}"
+        res.append(delete_files(delete_path))
+    
+    return res

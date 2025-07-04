@@ -13,15 +13,15 @@ class User(Base):
     id = Column(Integer, primary_key=True)
     userid = Column(String(100), unique=True, nullable=False)
     password = Column(String(500), nullable=True)
-    email = Column(String(50), nullable=False)
-    phone = Column(String(13), nullable=False)
+    email = Column(String(50), nullable=True)
+    phone = Column(String(13), nullable=True)
     username = Column(String(50), nullable=True)
     usertype = Column(String(20), index=True, nullable=False)
     permission = Column(String(20), index=True, nullable=False)
     nickname = Column(String(100), nullable=True)
     orgname = Column(String(50), nullable=True)
     domain = Column(String(50), nullable=True)
-    modify_date = Column(DateTime, nullable=False)
+    modify_date = Column(DateTime, nullable=True)
     create_date = Column(DateTime, nullable=False)
 
 

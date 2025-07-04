@@ -1,19 +1,17 @@
 import os
-from fastapi import UploadFile
 from fastapi import status
 from fastapi.responses import JSONResponse
-from meme.domain.files.files_schema import FilesUpload, FilesDelete
+from .files_schema import FilesUpload
 from fastapi import Depends, status
-from operator import itemgetter
 import shutil
 from pathlib import Path
+from typing import List
 
 from dotenv import load_dotenv
 load_dotenv()
 ROOT_PATH= os.environ.get('ROOT_PATH')
 UPLOAD_PATH= os.environ.get('UPLOAD_PATH')
 UPLOADS_PATH= f"{ROOT_PATH}\\{UPLOAD_PATH}"
-print('meme upload', UPLOADS_PATH)
 
 def makedirs(path):
     if not os.path.exists(path):
@@ -65,19 +63,23 @@ async def file_chunk_upload (
         {"status": "Chunk success"}, status_code=status.HTTP_200_OK)
 
 def delete_files(path: str):
-    # dir=path
     dir=Path(path)
-    # dir= f"{UPLOADS_PATH}{path}"
-    # dir= os.path.join(UPLOADS_PATH, item.path)
-    print(path, dir)
-    # return
-    
     try:
       res= shutil.rmtree(dir)
-    #   print(res)
       return JSONResponse(
         {"status": "success"}, status_code=status.HTTP_200_OK)
     except:
       print('에러발생')
       return JSONResponse(
         {"status": "fail"}, status_code=status.HTTP_200_OK)
+
+
+def delete_multiple_files(root_path:str, paths:List[str]):
+    res= []
+    for p in paths:
+        delete_path= f"{root_path}/{p}"
+        # print(delete_path)
+        res.append(delete_files(delete_path))
+    
+    return { "status": "success", "result": res }, 
+    
