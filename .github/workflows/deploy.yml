@@ -45,17 +45,17 @@ jobs:
           remote_key: ${{ secrets.SSH_PRIVATE_KEY }}
           remote_port: ${{ secrets.REMOTE_SSH_PORT }}
 
-      - name: excuting remote ssh commands
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.REMOTE_IP }}
-          username: ${{ secrets.REMOTE_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.REMOTE_SSH_PORT }}
-          script: |
-            cd ~/projects/fastapi
-            source ~/venvs/fastapi/bin/activate
-            pip install -r requirements.txt
-            cd ~/projects/fastapi/website
-            alembic upgrade head
-            sudo systemctl restart fastapi
+      # - name: excuting remote ssh commands
+      #   uses: appleboy/ssh-action@master
+      #   with:
+      #     host: ${{ secrets.REMOTE_IP }}
+      #     username: ${{ secrets.REMOTE_USER }}
+      #     key: ${{ secrets.SSH_PRIVATE_KEY }}
+      #     port: ${{ secrets.REMOTE_SSH_PORT }}
+      #     script: |
+      #       cd ~/projects/fastapi
+      #       source ~/venvs/fastapi/bin/activate
+      #       pip install -r requirements.txt
+      #       cd ~/projects/fastapi/website
+      #       alembic upgrade head
+      #       sudo systemctl restart fastapi

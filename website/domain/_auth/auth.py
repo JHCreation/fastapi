@@ -29,7 +29,7 @@ REFRESH_KEY_NAME= os.environ.get('REFRESH_KEY_NAME')
 # oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/user/login")
 api_key_header = APIKeyHeader(name="Authorization", auto_error=False)
 get_bearer_token = HTTPBearer(auto_error=False)
-print('website SECRET_KEY', SECRET_KEY, ROOT_DIR, ACCESS_TOKEN_EXPIRE_MINUTES, REFRESH_TOKEN_EXPIRE_MINUTES)
+print('website SECRET_KEY', SECRET_KEY, ROOT_DIR, ACCESS_TOKEN_EXPIRE_MINUTES, REFRESH_TOKEN_EXPIRE_MINUTES, REFRESH_KEY_NAME)
 
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)

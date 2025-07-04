@@ -70,7 +70,7 @@ async def logout (response: Response, request: Request):
 @router.post("/refresh", response_model=Token )
 async def refresh ( response: Response, request: Request ):
     refresh_token= request.cookies.get(REFRESH_KEY_NAME)
-
+    logger.debug(f'{type(refresh_token)}')
     if type(refresh_token) == type(None):
         raise HTTPException(
             status_code = status.HTTP_403_FORBIDDEN,
