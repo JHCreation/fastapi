@@ -5,11 +5,12 @@ from fastapi import APIRouter, HTTPException, Response, Request
 from fastapi import Depends, Security
 from fastapi.encoders import jsonable_encoder
 
-from meme.database import get_db
+from meme.database import get_db, get_async_db
 from . import works_schema
 from meme.domain._comm import comm_crud, comm_schema
 from pydantic import ValidationError
 from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 from ...domain.user.user_auth import api_bearer_token
 import time
@@ -23,48 +24,40 @@ router = APIRouter(
 # print(oauth2_scheme.__dir__())
 from ...model.works import Works
 
-@router.get("/test")
-async def make_async_request():
-    """비동기 방식으로 외부 API 호출 test"""
-    try:
-        # 비동기 방식 요청
-        async with httpx.AsyncClient() as client:
-            response = await client.get("http://127.0.0.1:8000/api/works/list")
-            response.raise_for_status()
-            return response.json()
-    except httpx.HTTPError as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
 
 @router.post("/create")
-def create(
+async def create(
     item: works_schema.WorksCreate,
     # item: category_schema.CampaignCreate= Depends(),
-    db: Session = Depends(get_db),
-    api_key: str = Security(api_bearer_token)
+    db: AsyncSession = Depends(get_async_db),
+    # api_key: str = Security(api_bearer_token)
 ):  
     # category = category_crud.get_existing_category(db, category_create=item)
     # if category:
     #     raise HTTPException(status_code=status.HTTP_409_CONFLICT,
     #                         detail="이미 존재하는 카테고리입니다.")
+
+    
     update= {
         'create_date' : datetime.now(),
     }
-    return comm_crud.create(Works, db, item, res_id='id', update=update)
+    return await comm_crud.asyncCreate(Works, db, item, res_id='id', update=update)
 
 @router.put("/update/{id}")
-def update(
+async def update(
     # item,
-    id: int,
+    id: str,
     item: works_schema.WorksCreate,
     # item: category_schema.CampaignCreate= Depends(),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_async_db),
+    # db: Session = Depends(get_db),
     api_key: str = Security(api_bearer_token)
 ):  
     # update= {
     #     'create_date' : datetime.now(),
     # }
-    return comm_crud.update(Works, db, item, filter_key='id', filter_value=id, res_id='key')
+    return await comm_crud.asyncUpdate(Works, db, params=item, filter_key='key', filter_value=id, res_id='key')
+    # return comm_crud.update(Works, db, item, filter_key='id', filter_value=id, res_id='key')
 
 @router.get("/list", response_model=works_schema.WorksList)
 def list(db: Session = Depends(get_db),
@@ -78,6 +71,16 @@ def list(db: Session = Depends(get_db),
         'total': total,
         'list': list
     }
+
+
+@router.delete("/deletes")
+async def deletes(
+    param: works_schema.WorksDeletes,
+    db: AsyncSession = Depends(get_async_db),
+    # current_user: User = Depends(get_current_user)
+    api_key: str = Security(api_bearer_token)
+):
+    return await comm_crud.asyncDeletes(Works, db, filter_key='id', filter_value=param.ids)
 
 @router.get("/{id}",)
 def list( id: int, db: Session = Depends(get_db) ):

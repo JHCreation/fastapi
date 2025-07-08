@@ -25,7 +25,6 @@ router = APIRouter(
     tags=["web 공통 auth"],
     # dependencies=[Depends(check_domain_auth)],
 )
-
 @router.post("/login")
 def login(
     response: Response,
@@ -70,7 +69,7 @@ async def logout (response: Response, request: Request):
 @router.post("/refresh", response_model=Token )
 async def refresh ( response: Response, request: Request ):
     refresh_token= request.cookies.get(REFRESH_KEY_NAME)
-    logger.debug(f'{type(refresh_token)}')
+    logger.debug(f'key:{REFRESH_KEY_NAME}, refresh:{type(refresh_token)}, None:{type(None)}')
     if type(refresh_token) == type(None):
         raise HTTPException(
             status_code = status.HTTP_403_FORBIDDEN,

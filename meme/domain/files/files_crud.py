@@ -2,7 +2,7 @@ import os
 from fastapi import UploadFile
 from fastapi import status
 from fastapi.responses import JSONResponse
-from meme.domain.files.files_schema import FilesUpload, FilesDelete
+from .files_schema import FilesUpload, FilesDelete
 from fastapi import Depends, status
 from operator import itemgetter
 import shutil

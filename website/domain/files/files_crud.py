@@ -18,10 +18,10 @@ def makedirs(path):
         os.makedirs(path, exist_ok=True, mode=0o777)
 
 async def file_chunk_upload (
-        files_upload: FilesUpload,
-        CHUNK_PATH: str = '',
-        UPLOADS_FILE_PATH: str = '',
-        FILE_PATH: str= ''
+    files_upload: FilesUpload,
+    CHUNK_PATH: str = '',
+    UPLOADS_FILE_PATH: str = '',
+    FILE_PATH: str= ''
 ):
     name= files_upload.name
     file= files_upload.file

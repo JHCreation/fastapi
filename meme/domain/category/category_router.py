@@ -81,11 +81,11 @@ def category_delete(id: int,
 
 @router.delete("/deletes")
 def category_deletes(
-                    _category_deletes: category_schema.CategoryDeletes,
-                    db: Session = Depends(get_db),
-                    # current_user: User = Depends(get_current_user)
-                    api_key: str = Security(api_bearer_token)
-                    ):
+    _category_deletes: category_schema.CategoryDeletes,
+    db: Session = Depends(get_db),
+    # current_user: User = Depends(get_current_user)
+    api_key: str = Security(api_bearer_token)
+):
     # print('api_key',api_key)
     # return
     # db_question = category_crud.get_category(db, question_id=_question_delete.question_id)

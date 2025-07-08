@@ -4,8 +4,11 @@ from sqlalchemy import select, or_, and_, not_, func, delete
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from fastapi import APIRouter, HTTPException, Response, Request
 from starlette import status
+from sqlalchemy.ext.asyncio import AsyncSession
 import json
 import logging
+from ...lib import format
+
 
 def qryTree(node, model):
     print(type(node),node['id'])
@@ -168,6 +171,7 @@ async def asyncCreate(model, db: Session, param, res_id="id", update=None):
     if not isinstance(param, dict): 
         param= param.model_dump(exclude_unset=True, exclude_none=True)
     
+    param= format.makeToString(param)
     if update != None:
         param.update(update)
     data = model(**param)
@@ -243,3 +247,37 @@ async def asyncDelete(model, db: Session, filter_key='id', filter_value='', res_
     # print('stmt', stmt)
     # print('result', result)
     return result.rowcount
+
+
+# def deletes_categroy(db: Session, ids:str):
+    
+#     print('ids', ids, json.loads(ids.ids),  Category.id.in_(json.loads(ids.ids)))
+#     db_category= db.query(Category).filter(
+#         Category.id.in_(json.loads(ids.ids))
+#     )
+#     get_data= db_category.all()
+#     if not get_data:
+#         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+#                             detail="데이터를 찾을수 없습니다.")
+#     db_category.delete()
+#     db.commit()
+#     return { 'id': ids, 'status': 'success' }
+
+async def asyncDeletes(model, db: AsyncSession, filter_key='id', filter_value=''):
+    # return 
+    if not filter_value:
+        raise HTTPException(status_code=400, detail="No IDs provided")
+    key= getattr(model, filter_key)
+
+    stmt = delete(model).where(key.in_(json.loads(filter_value)))
+    result= await db.execute(stmt)
+    await db.commit()
+    print(key, filter_value, result.rowcount)
+
+    if result.rowcount == 0:
+        raise HTTPException(status_code=404, detail="삭제할 항목을 찾을 수 없습니다")
+
+    return {
+        "result": result.rowcount,
+        'status': 'success'
+    }

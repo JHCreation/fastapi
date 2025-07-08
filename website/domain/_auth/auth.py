@@ -30,6 +30,7 @@ REFRESH_KEY_NAME= os.environ.get('REFRESH_KEY_NAME')
 api_key_header = APIKeyHeader(name="Authorization", auto_error=False)
 get_bearer_token = HTTPBearer(auto_error=False)
 print('website SECRET_KEY', SECRET_KEY, ROOT_DIR, ACCESS_TOKEN_EXPIRE_MINUTES, REFRESH_TOKEN_EXPIRE_MINUTES, REFRESH_KEY_NAME)
+print('1234')
 
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
@@ -100,7 +101,7 @@ def set_cookie(response: Response, key: str, value, exp_min):
     response.set_cookie(
         key=key, 
         value=value, 
-        path="/",
+        # path="/",
         expires=expires, 
         samesite="none",
         secure=True,
