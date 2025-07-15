@@ -7,16 +7,10 @@ from ....config import logger, ROOT_DIR
 from fastapi.templating import Jinja2Templates
 from pathlib import Path
 from ....lib.format import format_phone_number, nl2br
-from dotenv import load_dotenv
-
+from ..eightpointone_router import DOMAIN_WWW, EMAIL_ACCOUNT, EMAIL_PASSWORD, EMAIL_TO
 router = APIRouter(
     prefix="/contact",
 )
-
-load_dotenv(dotenv_path=f'{ROOT_DIR}/.env', override=True)
-EMAIL_ACCOUNT_MAPOCLEAN= os.environ.get('EMAIL_ACCOUNT_MAPOCLEAN')
-EMAIL_PASSWORD_MAPOCLEAN= os.environ.get('EMAIL_PASSWORD_MAPOCLEAN')
-EMAIL_TO_MAPOCLEAN= os.environ.get('EMAIL_TO_MAPOCLEAN')
 
 BASE_DIR= Path(__file__).resolve().parent.parent.parent / 'mail' / 'templates'
 templates = Jinja2Templates( directory=str(BASE_DIR) )
@@ -27,7 +21,7 @@ async def email_template(request: Request):
     data = await request.json()
     email_context= {
         "request": request,
-        "host": "https://www.mapoclean.com",
+        "host": DOMAIN_WWW,
         "data": {
             "문의타입": ", ".join(data['category']),
             "업체/회사명": data['org_name'],
@@ -43,14 +37,14 @@ async def email_template(request: Request):
         "contact.html",
         email_context,
     ).body.decode()
-    to= EMAIL_TO_MAPOCLEAN
+    to= EMAIL_TO
     msg= {
         "Subject": '문의메일입니다.',
         "To": to,
     }
     content= MIMEText(html, 'html')
     res= await asyncio.gather(
-        send_naver_email(to_mail=to, mail_msg=msg, content=content, account=EMAIL_ACCOUNT_MAPOCLEAN, password=EMAIL_PASSWORD_MAPOCLEAN),
+        send_naver_email(to_mail=to, mail_msg=msg, content=content, account=EMAIL_ACCOUNT, password=EMAIL_PASSWORD),
     )
 
     return res
@@ -61,7 +55,7 @@ def email_template(request: Request):
 
     email_context = {
         "request": request,
-        "host": "http://mapoclean.com",
+        "host": DOMAIN_WWW,
         "data": {
             # "name": 'test',
             # "phone": '010-2826-8268',
