@@ -74,8 +74,14 @@ async def async_get_list(model, db: Session, skip: int = None, limit: int = None
     
     selected= select(model)
     if( filter ):
-        where= qryTree(filter, model)
-        selected= select(model).where(where)
+        if not isinstance(filter, dict): 
+            filter= json.loads(filter)
+
+        conditions = [getattr(model, key) == value for key, value in filter.items()]
+        if conditions:
+            selected = select(model).where(and_(*conditions))
+        # where= qryTree(filter, model)
+        # selected= select(model).where(where)
 
     stmt= selected\
         .offset(skip).limit(limit)\

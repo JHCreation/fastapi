@@ -37,8 +37,18 @@ async def list(
     db: AsyncSession = Depends(get_async_db),
     params: comm_schema.CommFilterList = Depends(),
 ):
-    logger.debug(params, Partners)
-    total, list= await comm_crud.async_get_list(Partners, db, skip=params.skip, limit=params.limit)
+    logger.debug(params.filter)
+    obj= {
+        "a": 1,
+        "b": 2
+    }
+    
+    total, list= await comm_crud.async_get_list(
+        Partners, db, 
+        skip=params.skip, 
+        limit=params.limit, 
+        filter=params.filter
+    )
     return {
         "total": total,
         "list": list

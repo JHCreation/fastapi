@@ -9,7 +9,7 @@ from ..._comm import comm_schema, comm_crud
 
 from ....database import get_async_db
 from ....model.eightpointone.eightpointone_model import News
-from ....config import logger
+from ....config import logger, ROOT_DIR
 from .news_schema import NewsCreate, NewsBase, NewsUpdate, NewsDeletes
 from ...files import files_crud
 from ..eightpointone_router import DOMAIN_NAME
@@ -18,9 +18,8 @@ from typing import List
 import os
 import uuid
 from dotenv import load_dotenv
-load_dotenv()
+load_dotenv(dotenv_path=f'{ROOT_DIR}/.env', override=True)
 
-ROOT_PATH= os.environ.get('ROOT_PATH')
 UPLOAD_PATH= os.environ.get('UPLOAD_PATH')
 UPLOADS_PATH= f"{UPLOAD_PATH}"
 route_name="news"
