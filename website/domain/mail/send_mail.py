@@ -69,6 +69,14 @@ async def send_naver_email(to_mail='', mail_msg=msgs, content=None, account='', 
     smtp.starttls()
     send_email(smtp=smtp, account=account, password=password, to_mail=to_mail, mail_msg=mail_msg, content=content)
 
+async def send_naverWorks_email(to_mail='', mail_msg=msgs, content=None, account='', password=''):
+    print('naver')
+    smtp = smtplib.SMTP('smtp.worksmobile.com', 587)
+    smtp.ehlo()
+    smtp.starttls()
+    send_email(smtp=smtp, account=account, password=password, to_mail=to_mail, mail_msg=mail_msg, content=content)
+
+
 def send_email(smtp=None, account='', password='', to_mail='', mail_msg=msgs, content=None):
     smtp.login(account, password)
     msg = MIMEMultipart()

@@ -1,6 +1,6 @@
 import os
 from fastapi import APIRouter, Request
-from ...mail.send_mail import send_naver_email
+from ...mail.send_mail import send_naver_email, send_naverWorks_email
 from email.mime.text import MIMEText
 import asyncio
 from ....config import logger, ROOT_DIR
@@ -44,7 +44,7 @@ async def email_template(request: Request):
     }
     content= MIMEText(html, 'html')
     res= await asyncio.gather(
-        send_naver_email(to_mail=to, mail_msg=msg, content=content, account=EMAIL_ACCOUNT, password=EMAIL_PASSWORD),
+        send_naverWorks_email(to_mail=to, mail_msg=msg, content=content, account=EMAIL_ACCOUNT, password=EMAIL_PASSWORD),
     )
 
     return res
