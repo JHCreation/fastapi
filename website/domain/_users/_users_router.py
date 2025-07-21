@@ -20,7 +20,7 @@ from . import user_crud
 
 from ...database import get_db
 router = APIRouter(
-    prefix="/api/web/users",
+    prefix="/users",
     tags=["web 공통 users"]
 )
 

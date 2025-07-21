@@ -16,13 +16,13 @@ from ...domain.reviewers import reviewers_crud, reviewers_schema
 from pydantic import ValidationError
 import json
 
-from corenzohouse.route import router, router2
+# from corenzohouse.route import router, router2
 from corenzohouse.database import get_db, get_async_db
 from ...domain._comm import comm_crud
 
 # from _utils.crud import comm_crud
 
-from ...config import ROOT_DIR
+from ...config import logger, ROOT_DIR
 from dotenv import load_dotenv
 from ...model.reviewers import Reviewers
 from ...domain.webpush import webpush_crud
@@ -30,12 +30,14 @@ import httpx
 import time
 import logging
 
+router = APIRouter()
 
 load_dotenv(dotenv_path=f'{ROOT_DIR}/.env', override=True)
 
-log_level = os.getenv("LOG_LEVEL", "INFO").upper()
-logging.basicConfig(level=log_level)
-logger = logging.getLogger(__name__)
+# log_level = os.getenv("LOG_LEVEL", "INFO").upper()
+# logging.basicConfig(level=log_level)
+# logger = logging.getLogger(__name__)
+logger.debug(f"reviewer {ROOT_DIR}")
 
 # from reviewers_crud import order_get_list
 
@@ -54,7 +56,7 @@ async def subscribe(
     item: reviewers_schema.Reviewers,
     db: Session = Depends(get_async_db),
 ):
-    print(item)
+    # print(item)
     # return
     update= {
         # 'modify_date' : datetime.now(),

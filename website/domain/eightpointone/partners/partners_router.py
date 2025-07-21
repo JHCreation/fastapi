@@ -27,8 +27,6 @@ route_name="partners"
 
 router = APIRouter(
     prefix=f"/{route_name}",
-    tags=[f"epo/{route_name}"],
-
 )
 
 @router.get("/list")
@@ -37,12 +35,6 @@ async def list(
     db: AsyncSession = Depends(get_async_db),
     params: comm_schema.CommFilterList = Depends(),
 ):
-    logger.debug(params.filter)
-    obj= {
-        "a": 1,
-        "b": 2
-    }
-    
     total, list= await comm_crud.async_get_list(
         Partners, db, 
         skip=params.skip, 

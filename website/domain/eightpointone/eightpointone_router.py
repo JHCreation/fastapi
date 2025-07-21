@@ -19,12 +19,12 @@ DOMAIN_WWW="https://www.epo.kr"
 ALLOWED_ORIGINS = ["http://localhost:5173", DOMAIN_ROOT, DOMAIN_WWW]
 
 async def check_domain_auth(request: Request):
-    print('마포크린 요청 호스트 검사', request.headers.get("origin"))
+    print('epo요청 호스트 검사', request.headers.get("origin"))
     if request.headers.get("origin") not in ALLOWED_ORIGINS:
         raise HTTPException(status_code=403, detail="Not authorized")
 
 router = APIRouter(
-    prefix="/api/web/eightpointone",
+    prefix="/eightpointone",
     tags=["epo"],
     # dependencies=[Depends(check_domain_auth)],
 )

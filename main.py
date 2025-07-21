@@ -26,16 +26,11 @@ import meme.route
 import website.route
 # 얘네들이 실행되면서 load_dotenv(override)도 같이 덮어버리니 주의(순서)!
 
-# logging.debug("디버그 정보")
-# logging.error(os.environ.get('ENV'))
 load_dotenv(dotenv_path=f'{ROOT_DIR}/.env', override=True)
-# logging.info(ROOT_DIR, 'start!!!',' 2start')
-# print(ROOT_DIR)
-logging.error(os.environ.get('CORS_ORIGIN'))
 log_level = os.getenv("LOG_LEVEL", "INFO").upper()
 logging.basicConfig(level=log_level)
 logger = logging.getLogger(__name__)
-# print(log_level, '???')
+
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     logger.error(f"Validation error: {exc.errors()}")
@@ -47,34 +42,56 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 
 if __name__ == 'main':
     origins = json.loads(os.environ.get('CORS_ORIGIN'))
-    app.add_middleware(
-        CORSMiddleware,
-        # allow_origins=[],
-        allow_origins=origins,
-        # allow_origins=["*"],
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-        # allow_origin_func=get_allowed_origins,
-    )
+    # app.add_middleware(
+    #     CORSMiddleware,
+    #     # allow_origins=[],
+    #     allow_origins=origins,
+    #     # allow_origins=["*"],
+    #     allow_credentials=True,
+    #     allow_methods=["*"],
+    #     allow_headers=["*"],
+    #     # allow_origin_func=get_allowed_origins,
+    # )
     
 
 
 
-# class Item(BaseModel):
-#     name: str
-#     price: float
-#     is_offer: Union[bool, None] = None
-
-# @app.get("/")
-# def read_root():
-#     return {"Hello": "World"}
 
 
-# @app.get("/items/{item_id}")
-# def read_item(item_id: int, q: Union[str, None] = None):
-#     return {"item_id": item_id, "q": q}
+# # 모든 출처를 허용하는 서브 앱
+# sub_app_all_origins = FastAPI()
+# sub_app_all_origins.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=["*"],
+#     allow_credentials=True,
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+# )
 
-# @app.put("/items/{item_id}")
-# def update_item(item_id: int, item: Item):
-#     return {"item_price": item.price, "item_id": item_id}
+
+# # 특정 출처만 허용하는 서브 앱
+# sub_app_specific_origins = FastAPI()
+# sub_app_specific_origins.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=["https://my-frontend.com"],
+#     allow_credentials=True,
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+# )
+
+# @sub_app_specific_origins.get("/private")
+# async def read_private():
+#     return {"message": "Private access allowed only from my-frontend.com"}
+
+# # 메인 앱에 서브 앱들을 포함시킵니다.
+# app.mount("/api/public", sub_app_all_origins)
+# app.mount("/api/private", sub_app_specific_origins)
+
+# # 메인 앱 자체의 CORS 설정 (필요하다면)
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=["http://localhost:8000"], # 기본적으로 메인 앱은 localhost만 허용
+#     allow_credentials=True,
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+# )

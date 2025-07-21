@@ -1,6 +1,5 @@
-from datetime import timedelta, datetime, UTC
-from typing import Annotated, Union
-from fastapi import APIRouter, HTTPException, Response, Request
+from datetime import datetime, UTC
+from fastapi import APIRouter
 from fastapi import Depends, Security, Form, Body, Query
 from starlette import status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -9,22 +8,20 @@ from ..._comm import comm_schema, comm_crud
 
 from ....database import get_async_db
 from ....model.mapoclean.mapoclean_works import Works
-from ....config import logger
-from .works_schema import WorksCreate, WorksBase, WorksUpdate, WorksDeletes
+from ....config import logger, ROOT_DIR
+from .works_schema import WorksCreate, WorksBase, WorksDeletes
 from ...files import files_crud
 from ..mapoclean_router import DOMAIN_NAME
 from ..._auth.auth import api_bearer_token
-from typing import List
 import os
-import uuid
 from dotenv import load_dotenv
-load_dotenv()
+
+load_dotenv(dotenv_path=f'{ROOT_DIR}/.env', override=True)
 
 ROOT_PATH= os.environ.get('ROOT_PATH')
 UPLOAD_PATH= os.environ.get('UPLOAD_PATH')
 UPLOADS_PATH= f"{UPLOAD_PATH}"
 route_name="works"
-
 router = APIRouter(
     prefix=f"/{route_name}",
     # tags=["mapoclean/works"]
@@ -49,7 +46,6 @@ async def create_works(
     db: AsyncSession = Depends(get_async_db),
     api_key: str = Security(api_bearer_token)
 ):
-    # logger.debug(f"마포크린 works : {item}")
     update= {
         'create_date' : datetime.now(),
     }
@@ -74,8 +70,6 @@ async def delete_works(
     api_key: str = Security(api_bearer_token)
 
 ):
-    # print(item)
-    # return
     return await comm_crud.async_delete(Works, db, filter_key='id', filter_value=id, res_id='id')
  
 

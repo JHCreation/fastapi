@@ -4,7 +4,7 @@ from .database import Base
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from typing import List
 
-from .model import webpush, orders, reviewers
+from .model import webpush, orders, reviewers, users
 # from .model import wine
 # class User(Base):
 #     __tablename__ = "user"

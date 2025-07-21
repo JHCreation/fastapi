@@ -17,17 +17,19 @@ from pywebpush import webpush, WebPushException
 from pydantic import ValidationError
 import json
 
-from corenzohouse.route import router, router2
+# from corenzohouse.route import router, router2
 from corenzohouse.database import get_db, get_async_db
 from ...domain._comm import comm_crud
 
 # from _utils.crud import comm_crud
 
-from ...config import ROOT_DIR
-from dotenv import load_dotenv
+# from ...config import ROOT_DIR
+# from dotenv import load_dotenv
 from ...model.webpush import WebPush, WebPushLog
 # load_dotenv()
-load_dotenv(dotenv_path=f'{ROOT_DIR}/.env', override=True)
+# load_dotenv(dotenv_path=f'{ROOT_DIR}/.env', override=True)
+
+router = APIRouter()
 
 VAPID_PRIVATE_KEY = os.environ.get('VAPID_PRIVATE_KEY')
 VAPID_PUBLIC_KEY = os.environ.get('VAPID_PUBLIC_KEY')

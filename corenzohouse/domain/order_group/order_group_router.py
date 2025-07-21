@@ -17,7 +17,7 @@ from ...domain.orders import orders_crud, orders_schema
 from pydantic import ValidationError
 import json
 
-from corenzohouse.route import router, router2
+# from corenzohouse.route import router, router2
 from corenzohouse.database import get_db, get_async_db
 from ...domain._comm import comm_crud
 
@@ -26,6 +26,9 @@ from typing import List
 from ...config import ROOT_DIR
 from dotenv import load_dotenv
 from ...model.orders import OrderGroup
+router = APIRouter()
+
+
 load_dotenv(dotenv_path=f'{ROOT_DIR}/.env', override=True)
 
 import logging

@@ -26,7 +26,7 @@ route_name="news"
 
 router = APIRouter(
     prefix=f"/{route_name}",
-    tags=[f"epo/{route_name}"],
+    # tags=[f"epo/{route_name}"],
 
 )
 
@@ -36,8 +36,13 @@ async def list(
     db: AsyncSession = Depends(get_async_db),
     params: comm_schema.CommFilterList = Depends(),
 ):
-    logger.debug(params, News)
-    total, list= await comm_crud.async_get_list(News, db, skip=params.skip, limit=params.limit)
+    # logger.debug(f"{params, News}")
+    total, list= await comm_crud.async_get_list(
+        News, db, 
+        skip=params.skip, 
+        limit=params.limit,
+        filter=params.filter
+    )
     return {
         "total": total,
         "list": list

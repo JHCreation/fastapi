@@ -17,7 +17,7 @@ async def check_domain_auth(request: Request):
 
 router = APIRouter(
     # allow_origins=["*"],
-    prefix="/api/web/category",
+    prefix="/category",
     tags=["web 공통 category"],
     # dependencies=[Depends(check_domain_auth)],
 )

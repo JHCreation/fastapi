@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 from starlette import status
 
 from pydantic import ValidationError
-from ...models import User
+from ...model.users import Users
 from fastapi.responses import RedirectResponse, JSONResponse
 from .auth import verify_password, set_cookie, create_refresh_token, create_access_token, delete_cookie, ALGORITHM, REFRESH_KEY_NAME, REFRESH_SECRET_KEY, REFRESH_TOKEN_EXPIRE_MINUTES
 from ...config import logger
@@ -19,7 +19,7 @@ from ...database import get_db
 from .._users import user_crud
 router = APIRouter(
     # allow_origins=["*"],
-    prefix="/api/web/auth",
+    prefix="/auth",
     tags=["web 공통 auth"],
     # dependencies=[Depends(check_domain_auth)],
 )

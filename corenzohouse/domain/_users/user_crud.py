@@ -1,7 +1,7 @@
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 from .user_schema import UserCreate, UserCreatePW
-from ...models import User
+from ...model.users import Users as User
 from datetime import datetime
 from starlette import status
 from fastapi import APIRouter, HTTPException, Response, Request

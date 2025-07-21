@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from .config import ROOT_DIR
 
 load_dotenv(dotenv_path=f'{ROOT_DIR}/.env', override=True)
-print('website!', os.environ.get('DB_NAME'), os.getcwd(), f'{ROOT_DIR}/.env')
+# print('website!', os.environ.get('DB_NAME'), os.getcwd(), f'{ROOT_DIR}/.env')
 
 USERNAME= os.environ.get('DB_USERNAME')
 PASSWORD= quote_plus(os.environ.get('DB_PASSWORD'))

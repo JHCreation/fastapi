@@ -16,7 +16,7 @@ async def check_domain_auth(request: Request):
 
 router = APIRouter(
     # allow_origins=["*"],
-    prefix="/api/web/mapoclean",
+    prefix="/mapoclean",
     tags=["mapo-clean"],
     # dependencies=[Depends(check_domain_auth)],
 )

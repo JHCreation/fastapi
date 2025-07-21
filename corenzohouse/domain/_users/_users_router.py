@@ -13,15 +13,15 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from ...database import get_async_db
 from ...config import logger
 from .._comm import comm_schema, comm_crud
-from ...models import User
+from ...model.users import Users as User
 from .user_schema import UsersCreate, UsersDeletes, UsersUpdate
 from .._auth.auth import api_bearer_token, get_password_hash
 from . import user_crud
 
 from ...database import get_db
 router = APIRouter(
-    prefix="/api/web/users",
-    tags=["web 공통 users"]
+    prefix="/users",
+    tags=["corenzo users"]
 )
 
 @router.get("/list")

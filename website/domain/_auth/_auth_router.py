@@ -21,7 +21,7 @@ from ...database import get_db
 from .._users import user_crud
 router = APIRouter(
     # allow_origins=["*"],
-    prefix="/api/web/auth",
+    prefix="/auth",
     tags=["web 공통 auth"],
     # dependencies=[Depends(check_domain_auth)],
 )

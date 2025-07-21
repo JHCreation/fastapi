@@ -16,19 +16,16 @@ import uuid
 from dotenv import load_dotenv
 from ...config import logging, ROOT_DIR
 
-# load_dotenv()
 load_dotenv(dotenv_path=f'{ROOT_DIR}/.env', override=True)
-
 ROOT_PATH= os.environ.get('ROOT_PATH')
 UPLOAD_PATH= os.environ.get('UPLOAD_PATH')
 UPLOADS_PATH= f"{UPLOAD_PATH}"
 
 router = APIRouter(
-    prefix="/api/web/files",
-    tags=["web 공통 filess"],
+    prefix="/files",
+    tags=["web 공통 files"],
 
 )
-# print("website files router!!",ROOT_PATH, UPLOAD_PATH, BASE_DIR, ROOT_DIR)
 
 def makedirs(path):
     if not os.path.exists(path):
