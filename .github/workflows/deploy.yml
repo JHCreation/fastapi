@@ -27,8 +27,8 @@ jobs:
         uses: burnett01/rsync-deployments@master
         with:
           switches: -avzr --delete --exclude='.git' --exclude='.github' --exclude='.gitignore' --exclude='.env'
-          path: ./website/
-          remote_path: ~/projects/fastapi/website
+          path: ./corenzohouse/
+          remote_path: ~/projects/fastapi/corenzohouse
           remote_host: ${{ secrets.REMOTE_IP }}
           remote_user: ${{ secrets.REMOTE_USER }}
           remote_key: ${{ secrets.SSH_PRIVATE_KEY }}
@@ -56,6 +56,6 @@ jobs:
             # cd ~/projects/fastapi
             # source ~/venvs/fastapi/bin/activate
             # pip install -r requirements.txt
-            # cd ~/projects/fastapi/website
+            # cd ~/projects/fastapi/corenzohouse
             # alembic upgrade head
             sudo systemctl restart fastapi
