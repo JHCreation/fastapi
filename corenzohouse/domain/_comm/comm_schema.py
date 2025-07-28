@@ -9,8 +9,7 @@ class CommList(BaseModel):
     total: int = 0
     list: Any
 
-
 class CommFilterList(BaseModel):
-    page: int = 0
-    size: int = 10
-    filter: str = None
+    skip: int | None = None
+    limit: int | None = None
+    filter: str | None = None

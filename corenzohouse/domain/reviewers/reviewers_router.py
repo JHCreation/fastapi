@@ -18,7 +18,7 @@ import json
 
 # from corenzohouse.route import router, router2
 from corenzohouse.database import get_db, get_async_db
-from ...domain._comm import comm_crud
+from ...domain._comm import comm_crud, comm_schema
 
 # from _utils.crud import comm_crud
 
@@ -29,6 +29,7 @@ from ...domain.webpush import webpush_crud
 import httpx
 import time
 import logging
+from sqlalchemy import select
 
 router = APIRouter()
 
@@ -39,16 +40,41 @@ load_dotenv(dotenv_path=f'{ROOT_DIR}/.env', override=True)
 # logger = logging.getLogger(__name__)
 logger.debug(f"reviewer {ROOT_DIR}")
 
-# from reviewers_crud import order_get_list
-
-@router.get("/reviewers")
-async def orders_get_list(
+@router.get("/reviewers-test-contains")
+async def reviewers_test_contains(
     request: Request, 
     db: Annotated[Session, Depends(get_async_db)], 
     params: reviewers_schema.Reviewers = Depends(),
 ):
-    list= await reviewers_crud.reviewers_get_list(db, params.model_dump(exclude_unset=True, exclude_none=True))
-    return{ 'list' : list }
+    param= [
+        Reviewers.events.contains("micro-influencer"),
+        Reviewers.events.contains("test")
+    ]
+    stmt = select(Reviewers).filter(*param)
+
+    # 비동기 세션에서는 execute()를 사용하고 await 해야 합니다.
+    result = await db.execute(stmt)
+    results = result.scalars().all()
+
+    logger.debug(f"Results: {results}")
+
+    return {"message": "Query executed successfully", "data": results}
+
+@router.get("/reviewers")
+async def get_list(
+    request: Request, 
+    db: Annotated[Session, Depends(get_async_db)], 
+    # params: reviewers_schema.Reviewers = Depends(),
+    params: comm_schema.CommFilterList = Depends(),
+
+):
+    # list= await reviewers_crud.reviewers_get_list(db, params.model_dump(exclude_unset=True, exclude_none=True))
+    # return{ 'list' : list }
+    total, list= await comm_crud.async_get_list(Reviewers, db, skip=params.skip, limit=params.limit)
+    return {
+        "total": total,
+        "list": list
+    }
 
 
 @router.post("/reviewers")

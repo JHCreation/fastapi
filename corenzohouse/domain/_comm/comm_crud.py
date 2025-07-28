@@ -4,9 +4,12 @@ from sqlalchemy import select, or_, and_, not_, func, delete
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from fastapi import APIRouter, HTTPException, Response, Request
 from starlette import status
+from ...lib import format
+from ...config import logger
+import json
 
 def qryTree(node, model):
-    print(type(node),node['id'])
+    logger.debug(type(node),node['id'])
     if(node['type'] == 'group'):
         qry= []
         
@@ -84,7 +87,7 @@ def get_list(model, db: Session, skip: int = 0, limit: int = 10, filter=None):
         .offset(skip).limit(limit)\
         .order_by(model.id.desc())
     data = db.scalars(qry)
-    print(str(qry.compile(compile_kwargs={"literal_binds": True})))
+    logger.debug(str(qry.compile(compile_kwargs={"literal_binds": True})))
     
     total = db.scalar(select(func.count()).select_from(selected))
     # total = db.select([db.func.count()]).select_from(selected).scalars()
@@ -107,6 +110,33 @@ def create(model, db: Session, param, res_id="id", update=None):
         'status': 'success'
     }
 
+
+async def async_get_list(model, db: Session, skip: int = None, limit: int = None, filter=None):
+    total_stmt = select(func.count()).select_from(model)
+    total_result = await db.execute(total_stmt)
+    total = total_result.scalar_one()
+    
+    selected= select(model)
+    if( filter ):
+        if not isinstance(filter, dict): 
+            filter= json.loads(filter)
+
+        conditions = [getattr(model, key) == value for key, value in filter.items()]
+        if conditions:
+            selected = select(model).where(and_(*conditions))
+        # where= qryTree(filter, model)
+        # selected= select(model).where(where)
+
+    stmt= selected\
+        .offset(skip).limit(limit)\
+        .order_by(model.id.desc())
+
+    compiled_query = stmt.compile(compile_kwargs={"literal_binds": True})
+    logger.debug(f"get list query: {str(compiled_query)}")
+    result = await db.execute(stmt)
+    list= result.scalars().all()
+    return total, list
+
 async def aync_get_list_all(model, db: Session):
     data = await db.scalars(select(model)
                             .order_by(model.id.desc()))
@@ -115,7 +145,7 @@ async def aync_get_list_all(model, db: Session):
     return total, list
     
 def get_item(model, db: Session, key: str, value: str):
-    print('get_item', key, value)
+    logger.debug('get_item', key, value)
     return db.query(model).filter(getattr(model, key) == value)
 
 def update(model, db: Session, param, filter_key='id', filter_value='', res_id="id", update=None):
@@ -132,7 +162,7 @@ def update(model, db: Session, param, filter_key='id', filter_value='', res_id="
         param,
         synchronize_session="evaluate"
     )
-    # print(update_query.statement.compile(compile_kwargs={"literal_binds": True}))
+    # logger.debug(update_query.statement.compile(compile_kwargs={"literal_binds": True}))
     db.commit()
     return { 
         res_id: getattr(data, res_id),
@@ -143,11 +173,13 @@ def update(model, db: Session, param, filter_key='id', filter_value='', res_id="
 
 
 async def asyncCreate(model, db: Session, param, res_id="id", update=None):
-    print('db 저장 시작')
+    logger.debug('db 저장 시작')
     
     if not isinstance(param, dict): 
         param= param.model_dump(exclude_unset=True, exclude_none=True)
     
+    param= format.makeToString(param)
+
     if update != None:
         param.update(update)
     data = model(**param)
@@ -171,7 +203,7 @@ async def asyncCreate(model, db: Session, param, res_id="id", update=None):
         ) from e
     # await db.commit()
     # await db.refresh(data)
-    print('db저장 완료!')
+    logger.debug('db저장 완료!')
     return { 
         res_id: getattr(data, res_id),
         'status': 'success'
@@ -179,7 +211,7 @@ async def asyncCreate(model, db: Session, param, res_id="id", update=None):
 
 
 def async_get_item(model, key: str, value: str):
-    # print('async_get_item', key, value)
+    # logger.debug('async_get_item', key, value)
     return select(model).where(getattr(model, key) == value)
 
 async def asyncUpdate(model, db: Session, params, filter_key='id', filter_value='', res_id="id", update=None):
@@ -211,10 +243,8 @@ async def asyncDelete(model, db: Session, filter_key='id', filter_value='', res_
     stmt = delete(model).where(getattr(model, filter_key) == filter_value)
     # 쿼리 출력
     compiled_query = stmt.compile(compile_kwargs={"literal_binds": True})
-    print("Executing query:", str(compiled_query))
+    logger.debug("Executing query:", str(compiled_query))
     result = await db.execute(stmt)
     await db.commit()
     # await db.refresh()
-    # print('stmt', stmt)
-    # print('result', result)
     return result.rowcount

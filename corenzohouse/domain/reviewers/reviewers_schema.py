@@ -19,4 +19,5 @@ class Reviewers(BaseModel):
     link: str | None = None
     wish_drink: str | None = None
     msg: str | None = None
+    events: List[str] | None = None
     # create_date: str | None = None

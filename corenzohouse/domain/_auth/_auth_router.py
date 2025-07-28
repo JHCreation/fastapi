@@ -17,12 +17,12 @@ from ...config import logger
 from .auth_schema import Token, RefreshToken
 from ...database import get_db
 from .._users import user_crud
+
 router = APIRouter(
-    # allow_origins=["*"],
     prefix="/auth",
-    tags=["web 공통 auth"],
-    # dependencies=[Depends(check_domain_auth)],
+    tags=["corenzo auth"],
 )
+
 @router.post("/login")
 def login(
     response: Response,

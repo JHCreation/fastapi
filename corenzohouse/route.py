@@ -166,4 +166,4 @@ corenzo_app.add_middleware(
 for route in routers:
     corenzo_app.include_router(route)
 
-app.mount("/api/corenzo", corenzo_app)
+app.mount("/corenzo", corenzo_app)
