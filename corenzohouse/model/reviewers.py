@@ -17,6 +17,7 @@ class Reviewers(Base):
     email = Column(VARCHAR(50), nullable=True)
     link = Column(VARCHAR(1000), index=True, nullable=False)
     wish_drink = Column(VARCHAR(128), nullable=False)
+    service = Column(VARCHAR(255), nullable=True)
     msg = Column(VARCHAR(255), nullable=True)
     create_date = Column(DateTime, nullable=False)
     events = Column(VARCHAR(100), index=True, nullable=True)

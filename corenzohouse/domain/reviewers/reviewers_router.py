@@ -6,6 +6,7 @@ from fastapi import Depends, Security
 from fastapi.security import OAuth2PasswordRequestForm
 from jose import jwt, JWTError
 from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 from fastapi import FastAPI, Body
 import asyncio
@@ -32,13 +33,11 @@ import logging
 from sqlalchemy import select
 
 router = APIRouter()
-
 load_dotenv(dotenv_path=f'{ROOT_DIR}/.env', override=True)
-
-# log_level = os.getenv("LOG_LEVEL", "INFO").upper()
-# logging.basicConfig(level=log_level)
-# logger = logging.getLogger(__name__)
 logger.debug(f"reviewer {ROOT_DIR}")
+
+NCP_ACCESS_KEY = os.environ.get('NCP_ACCESS_KEY')
+NCP_SECRET_KEY = os.environ.get('NCP_SECRET_KEY')
 
 @router.get("/reviewers-test-contains")
 async def reviewers_test_contains(
@@ -93,11 +92,17 @@ async def subscribe(
 @router.post("/reviewers-confirm")
 async def confirmed(
     item= Body(...),
+    db: AsyncSession = Depends(get_async_db),
 ):
-    logger.debug(item, type(item))   # 기본적으로 출력되지 않음 (DEBUG는 INFO보다 낮음)
+    params= item['data']
+    logger.debug(f"{params}")
 
-    accessKey='DfniYnHiwvbNVF2dEmjo'
-    secretKey='pGHJknpOG3PrqfWajFDojC8RVJII2kVarhiHseE9'
+    data_results= await comm_crud.asyncBulkUpdate(Reviewers, db, params, filter_key='id')
+    # return data_results
+
+
+    accessKey= NCP_ACCESS_KEY
+    secretKey= NCP_SECRET_KEY
 
     # {
     #     "type": "SMS",
@@ -116,7 +121,7 @@ async def confirmed(
     # }
 
     result = []
-    for param in item:
+    for param in item['sms']:
 
         timestamp = int(time.time() * 1000)
         timestamp = str(timestamp)
@@ -134,4 +139,8 @@ async def confirmed(
             response = await client.post(url, json=param, headers=headers)
             result.append({"status_code": response.status_code, "response": response.json()})
         
-    return result 
+        
+    return {
+        "data": data_results,
+        "sms": result
+    }

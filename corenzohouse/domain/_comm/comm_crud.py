@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from datetime import datetime
 from sqlalchemy import select, or_, and_, not_, func, delete
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
@@ -172,6 +173,7 @@ def update(model, db: Session, param, filter_key='id', filter_value='', res_id="
 
 
 
+
 async def asyncCreate(model, db: Session, param, res_id="id", update=None):
     logger.debug('db 저장 시작')
     
@@ -215,7 +217,8 @@ def async_get_item(model, key: str, value: str):
     return select(model).where(getattr(model, key) == value)
 
 async def asyncUpdate(model, db: Session, params, filter_key='id', filter_value='', res_id="id", update=None):
-    update_data = params.model_dump(exclude_unset=True, exclude_none=True)  # None이 아닌 값만 필터링'
+    if not isinstance(params, dict): 
+        update_data = params.model_dump(exclude_unset=True, exclude_none=True)  # None이 아닌 값만 필터링'
 
     query = async_get_item(model, key=filter_key, value=filter_value)
     
@@ -237,6 +240,43 @@ async def asyncUpdate(model, db: Session, params, filter_key='id', filter_value=
         res_id: getattr(data, res_id),
         'status': 'success'
     }
+
+
+
+async def asyncBulkUpdate(model, db: AsyncSession, params: list, filter_key="id", update=None):
+    updated_objects = []
+
+    for param in params:
+        filter_value = param.get(filter_key)
+        if filter_value is None:
+            raise HTTPException(status_code=400, detail=f"{filter_key} 누락")
+
+        # DB에서 row 조회
+        result = await db.execute(
+            select(model).where(getattr(model, filter_key) == filter_value)
+        )
+        obj = result.scalar_one_or_none()
+        if not obj:
+            raise HTTPException(status_code=400, detail=f"{filter_key}={filter_value} 데이터 없음")
+
+        update_data = {k: v for k, v in param.items() if v is not None}
+        if update:
+            update_data.update(update)
+
+        for k, v in update_data.items():
+            setattr(obj, k, v)
+
+        updated_objects.append(obj)
+
+    await db.commit()
+    for obj in updated_objects:
+        await db.refresh(obj)
+
+    return [{filter_key: getattr(obj, filter_key), "status": "success"} for obj in updated_objects]
+
+
+
+
 
 
 async def asyncDelete(model, db: Session, filter_key='id', filter_value='', res_id="id", update=None):
