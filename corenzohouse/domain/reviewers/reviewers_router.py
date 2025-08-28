@@ -144,3 +144,15 @@ async def confirmed(
         "data": data_results,
         "sms": result
     }
+
+
+@router.put("/reviewers-updates")
+async def update_selected(
+    item= Body(...),
+    db: AsyncSession = Depends(get_async_db),
+):
+    params= item
+    logger.debug(f"{params}")
+    # return {"message": "This is a placeholder for the update selected endpoint."}
+
+    return await comm_crud.asyncBulkUpdate(Reviewers, db, params, filter_key='id')
