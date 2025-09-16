@@ -7,6 +7,7 @@ from fastapi import FastAPI, HTTPException, Request
 from starlette.middleware.cors import CORSMiddleware
 from fastapi import APIRouter, HTTPException, Response, Request
 from fastapi import Depends, Security
+from .config import BASE_DIR, ROOT_DIR, logger
 
 
 
@@ -56,6 +57,23 @@ router2 = APIRouter(
     dependencies=[Depends(check_domain2_auth)],
 )
 
+origins = os.environ.get('CORS_ORIGIN').split(',') if os.environ.get('CORS_ORIGIN') else []
+meme_app = FastAPI(
+    swagger_ui_parameters={
+        # "defaultModelsExpandDepth": -1,    # 전체 모델 정의 숨김
+        # "defaultModelExpandDepth": 0,      # 단일 모델 접기
+        "docExpansion": "none",            # 전체 operation collapse ("list", "full", "none")
+    }
+)
+print('CORS_ORIGIN meme route!', origins)
+meme_app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 from .domain.files import files_router
 from .domain.category import category_router
 from .domain.campaign import campaign_router
@@ -65,11 +83,12 @@ from .domain.user import user_router
 from .domain.works import works_router
 from .domain.contact import contact_router
 
-app.include_router(files_router.router)
-app.include_router(question_router.router)
-app.include_router(answer_router.router)
-app.include_router(user_router.router)
-app.include_router(campaign_router.router)
-app.include_router(category_router.router)
-app.include_router(works_router.router)
-app.include_router(contact_router.router)
+meme_app.include_router(files_router.router)
+meme_app.include_router(question_router.router)
+meme_app.include_router(answer_router.router)
+meme_app.include_router(user_router.router)
+meme_app.include_router(campaign_router.router)
+meme_app.include_router(category_router.router)
+meme_app.include_router(works_router.router)
+meme_app.include_router(contact_router.router)
+app.mount("/myz", meme_app)

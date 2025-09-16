@@ -18,8 +18,9 @@ DOMAIN_WWW="https://www.rozone.co.kr"
 ALLOWED_ORIGINS = ["http://localhost:5174", DOMAIN_ROOT, DOMAIN_WWW]
 
 async def check_domain_auth(request: Request):
-    print('rozone요청 호스트 검사', request.headers.get("origin"))
-    if request.headers.get("origin") not in ALLOWED_ORIGINS:
+    origin = request.headers.get("x-forwarded-origin") or request.headers.get("origin")
+    print('rozone요청 호스트 검사', request.headers.get("x-forwarded-origin"), request.headers.get("origin"), origin)
+    if origin not in ALLOWED_ORIGINS:
         raise HTTPException(status_code=403, detail="Not authorized")
 
 router = APIRouter(
