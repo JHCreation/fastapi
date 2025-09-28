@@ -23,11 +23,13 @@ async def email_template(request: Request):
         "request": request,
         "host": DOMAIN_WWW,
         "data": {
-            "문의타입": ", ".join(data['category']),
-            "업체/회사명": data['org_name'],
-            "이름": data['name'],
+            "이름(업체명)": data['org_name'],
             "이메일": data['email'],
             "연락처": format_phone_number(data['phone']),
+            "지역": data['location'],
+            "모델": ", ".join(data['product']),
+            "추가상품": ", ".join(data['product_add']),
+            "전화가능시간": data['phone_time'],
             "문의내용": nl2br(data['msg']),
         }
     }

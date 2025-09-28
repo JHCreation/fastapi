@@ -1,0 +1,80 @@
+from sqlalchemy.orm import Session
+from ...model.reviewers import Reviewers
+from sqlalchemy.future import select
+
+
+import sys
+import os
+import hashlib
+import hmac
+import base64
+import requests
+import time
+
+def	make_signature(accessKey, secretKey, timestamp):
+    # timestamp = int(time.time() * 1000)
+    # timestamp = str(timestamp)
+
+    access_key = accessKey
+    secret_key = secretKey
+    secret_key = bytes(secret_key, 'UTF-8')
+
+    method = "POST"
+    uri = "/sms/v2/services/ncp:sms:kr:257063279563:jhc-message/messages"
+
+    message = method + " " + uri + "\n" + timestamp + "\n" + access_key
+    message = bytes(message, 'UTF-8')
+    signingKey = base64.b64encode(hmac.new(secret_key, message, digestmod=hashlib.sha256).digest())
+    return signingKey
+
+
+async def reviewers_get_list( db: Session, params: dict ):
+    query = select(Reviewers)
+
+    # if params.get('key') is not None:
+    #     query = query.where(Reviewers.key.ilike(f"%{params['key']}%"))
+    # if params.get('min_date') is not None:
+    #     query = query.where(Reviewers.create_date >= params['min_date'])
+    # if params.get('max_date') is not None:
+    #     query = query.where(Reviewers.create_date <= params['max_date'])
+    # if params.get('oid') is not None:
+    #     if not isinstance(params['oid'], list):  # 리스트 타입인지 확인
+    #         query = query.where(Reviewers.order_id == params['oid'])
+    #     else:
+    #         query = query.where(Reviewers.order_id.in_(params['oid']))
+
+    # if params.get('status') is not None:
+    #     query = query.where(Orders.status == params['status'])
+    
+    print(f"Generated Query: {str(query)}")
+    query= query.order_by(Reviewers.id.desc())
+    result= await db.execute(query)
+    data = result.scalars().all()
+    return data
+
+
+# async def order_get_list(db: Session, key: str = None, min_date: int = None, max_date: int = None,
+#                          tid: str = None, oid: str = None, sid: str = None, status: str = None):
+#     query = select(Orders)
+
+#     if key:
+#         query = query.where(Orders.key.ilike(f"%{key}%"))  # 부분 검색 (대소문자 구분X)
+#     if min_date:
+#         query = query.where(Orders.create_date >= min_date)
+#     if max_date:
+#         query = query.where(Orders.create_date <= max_date)
+#     if tid:
+#         query = query.where(Orders.table_id == tid)
+#     if oid:
+#         query = query.where(Orders.order_id == oid)
+#     if sid:
+#         query = query.where(Orders.store_id == sid)
+#     if status:
+#         query = query.where(Orders.status == status)
+
+    
+#     print(f"Generated Query: {str(query)}")
+#     query= query.order_by(Orders.id.desc())
+#     result= await db.execute(query)
+#     list = result.scalars().all()
+#     return list
